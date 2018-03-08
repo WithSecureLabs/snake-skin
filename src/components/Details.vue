@@ -39,6 +39,13 @@
                     <td v-if="file">{{ file.sha256_digest }}</td>
                   </tr>
                   <tr>
+                    <th>Submission Type</th>
+                    <td v-if="file">
+                      <tags v-if="file.submission_type.length > 0" :tags=[file.submission_type]></tags>
+                      <span v-else>N/A</span>
+                    </td>
+                  </tr>
+                  <tr>
                     <th>Tags</th>
                     <td v-if="file" class="level">
                         <div class="level-left">
@@ -53,6 +60,44 @@
               </table>
             </div>
           </nav>
+          <div v-if="file && Object.keys(file.parents).length > 0">
+            <h2 class="subtitle">Parents</h2>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Parent (SHA256 Digest)</th>
+                  <th>Submission Types</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="parent in Object.keys(file.parents)">
+                  <td>{{ parent }}</td>
+                  <td>
+                    <tags :tags=file.parents[parent]></tags>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="file && Object.keys(file.children).length > 0">
+            <h2 class="subtitle">Children</h2>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Child (SHA256 Digest)</th>
+                  <th>Submission Types</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="child in Object.keys(file.children)">
+                  <td>{{ child }}</td>
+                  <td>
+                    <tags :tags=file.children[child]></tags>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <div v-if="hex !== ''">
             <h2 class="subtitle">Hexdump</h2>
             <nav class="panel">

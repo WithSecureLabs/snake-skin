@@ -5,6 +5,8 @@ export const config = {
   ],
   types: [
     {'keyword': 'high', 'style': 'is-danger'},
-    {'keyword': 'medium', 'style': 'is-warning'}
+    {'keyword': 'medium', 'style': 'is-warning'},
+    {'keyword': 'scale', 'style': 'is-dark'},
+    {'keyword': 'upload', 'style': 'is-dark'}
   ]
 }

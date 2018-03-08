@@ -22,7 +22,13 @@ export default {
           this.tags === '') {
         return []
       }
-      var tss = this.tags.split(',')
+      // Handle lists and comma separated
+      var tss = []
+      if (this.tags instanceof Array) {
+        tss = this.tags
+      } else {
+        tss = this.tags.split(',')
+      }
       var ts = []
       for (var i in tss) {
         var parts = tss[i]
