@@ -128,7 +128,7 @@ const actions = {
   getFile (context) {
     API.get('store?filter[sha256_digest]=' + context.state.sha256Digest)
       .then(response => {
-        context.commit('setFile', response.data['data']['store'][0])
+        context.commit('setFile', response.data['data']['samples'][0])
         if (context.state.file.file_type === 'file') { // Additionally get the hex
           context.dispatch('getFileHex')
         }

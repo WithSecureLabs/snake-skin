@@ -85,7 +85,7 @@ const actions = {
     }
     API.get(url)
       .then(response => {
-        context.commit('setFiles', response.data['data']['store'])
+        context.commit('setFiles', response.data['data']['samples'])
         context.commit('setStoreRunning', false)
       })
       .catch(e => {
@@ -102,7 +102,7 @@ const actions = {
     }
     API.get(url)
       .then(response => {
-        context.commit('setFiles', response.data['data']['store'])
+        context.commit('setFiles', response.data['data']['samples'])
         context.commit('setStoreRunning', false)
       })
       .catch(e => {
@@ -119,7 +119,7 @@ const actions = {
     }
     API.get(url)
       .then(response => {
-        context.commit('setFiles', response.data['data']['store'])
+        context.commit('setFiles', response.data['data']['samples'])
         context.commit('setStoreRunning', false)
       })
       .catch(e => {

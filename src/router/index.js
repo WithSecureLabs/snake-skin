@@ -9,6 +9,7 @@ import Error from '@/components/Error'
 import Interfaces from '@/components/Interfaces'
 import Memories from '@/components/Memories'
 import Notes from '@/components/Notes'
+import Sample from '@/components/Sample'
 import Upload from '@/components/Upload'
 
 Vue.use(Router)
@@ -100,6 +101,11 @@ const router = new Router({
           meta: {title: 'Memory / Analysis'}
         }
       ]
+    },
+    {
+      path: '/sample/:sha256_digest*',
+      component: Sample,
+      props: true
     },
     {
       path: '/upload',

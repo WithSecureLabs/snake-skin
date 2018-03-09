@@ -62,7 +62,7 @@
           </nav>
           <div v-if="file && Object.keys(file.parents).length > 0">
             <h2 class="subtitle">Parents</h2>
-            <table class="table">
+            <table class="table no-fixed-table">
               <thead>
                 <tr>
                   <th>Parent (SHA256 Digest)</th>
@@ -71,7 +71,9 @@
               </thead>
               <tbody>
                 <tr v-for="parent in Object.keys(file.parents)">
-                  <td>{{ parent }}</td>
+                  <td>
+                    <a class="no-break" :href="'/#/sample/' + parent">{{ parent }}</a>
+                  </td>
                   <td>
                     <tags :tags=file.parents[parent]></tags>
                   </td>
@@ -81,7 +83,7 @@
           </div>
           <div v-if="file && Object.keys(file.children).length > 0">
             <h2 class="subtitle">Children</h2>
-            <table class="table">
+            <table class="table no-fixed-table">
               <thead>
                 <tr>
                   <th>Child (SHA256 Digest)</th>
@@ -90,7 +92,9 @@
               </thead>
               <tbody>
                 <tr v-for="child in Object.keys(file.children)">
-                  <td>{{ child }}</td>
+                  <td>
+                    <a class="no-break" :href="'/#/sample/' + child">{{ child }}</a>
+                  </td>
                   <td>
                     <tags :tags=file.children[child]></tags>
                   </td>
@@ -396,6 +400,12 @@ table
 
 .row
   display: flex
+
+.no-break
+  word-break: normal
+
+.no-fixed-table
+  table-layout: auto
 
 .subtitle
   margin-bottom: 0.5em

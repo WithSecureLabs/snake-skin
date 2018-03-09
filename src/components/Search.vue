@@ -146,7 +146,7 @@ export default {
       this.searching = true
       API.get('store?' + filter)
         .then(response => {
-          var files = response.data['data']['store']
+          var files = response.data['data']['samples']
           this.files = files
           if (files.length === 1) {
             this.$router.push('/' + files[0].file_type + '/' + files[0].sha256_digest)
