@@ -348,7 +348,7 @@ table
   th
     padding-top: 0.3em
     padding-bottom: 0.3em
-    width: 140px
+    width: 150px
     word-wrap: break-word
   td
     padding-top: 0.3em
