@@ -431,7 +431,7 @@ export default {
             'command': data['command'],
             'output': e.response.data['message'],
             'format': 'plaintext',
-            'status': 'pending'
+            'status': 'failed'
           })
         })
     },
