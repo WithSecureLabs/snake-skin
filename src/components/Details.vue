@@ -41,7 +41,7 @@
                   <tr>
                     <th>Submission Type</th>
                     <td v-if="file">
-                      <tags v-if="file.submission_type.length > 0" :tags=[file.submission_type]></tags>
+                      <tags v-if="'submission_type' in file && file.submission_type.length > 0" :tags=[file.submission_type]></tags>
                       <span v-else>N/A</span>
                     </td>
                   </tr>
@@ -60,7 +60,7 @@
               </table>
             </div>
           </nav>
-          <div v-if="file && Object.keys(file.parents).length > 0">
+          <div v-if="file && 'parents' in file && Object.keys(file.parents).length > 0">
             <h2 class="subtitle">Parents</h2>
             <table class="table no-fixed-table">
               <thead>
@@ -81,7 +81,7 @@
               </tbody>
             </table>
           </div>
-          <div v-if="file && Object.keys(file.children).length > 0">
+          <div v-if="file && 'children' in file && Object.keys(file.children).length > 0">
             <h2 class="subtitle">Children</h2>
             <table class="table no-fixed-table">
               <thead>
