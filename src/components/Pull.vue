@@ -152,10 +152,13 @@ export default {
           this.pulling = false
         })
         .catch(e => {
-          this.data = 'Not run!'
-          console.log(e)
+          if ('message' in e.response.data && typeof e.response.data.message === 'string') {
+            this.data = e.response.data.message
+          } else {
+            this.data = 'Not run!'
+          }
           this.pulling = false
-          // this.errors.push(e)
+          this.errors.push(e)
         })
     },
 
