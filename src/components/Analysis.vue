@@ -105,6 +105,7 @@
 <script>
 import { API } from '@/config/config'
 import { mapGetters, mapMutations, mapState } from 'vuex'
+import highlightjs from 'highlight.js'
 import Dropdown from '@/components/Dropdown'
 import 'vue-awesome/icons/check'
 import 'vue-awesome/icons/circle-o-notch'
@@ -117,6 +118,11 @@ import Popper from 'vue-popperjs'
 import Vue from 'vue'
 var marked = require('marked-pax')
 var renderer = new marked.Renderer()
+renderer.code = (code, language) => {
+  const validLang = !!(language && highlightjs.getLanguage(language))
+  const highlighted = validLang ? highlightjs.highlight(language, code).value : code
+  return `<pre><code class="hljs ${language}">${highlighted}</code></pre>`
+}
 
 renderer.color = function (color, text) {
   if (color === 'green') {
@@ -597,6 +603,9 @@ export default {
 <style lang="sass" scoped>
 @import '../styles/settings.sass'
 @import '../styles/vue-popper.css'
+
+code, pre
+  overflow: unset
 
 .card
   box-shadow: 0 0px 0px rgba(46, 46, 46, 0.1), 0 0 0 1px rgba(46, 46, 46, 0.1)

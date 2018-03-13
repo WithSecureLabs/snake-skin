@@ -199,4 +199,6 @@ export default {
 .card
   margin-bottom: 1em
 
+.content
+  overflow: auto
 </style>
