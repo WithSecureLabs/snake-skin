@@ -34,11 +34,17 @@
 <script>
 import { API } from '@/config/config'
 import { mapActions, mapMutations, mapState } from 'vuex'
+import highlightjs from 'highlight.js'
 import 'vue-awesome/icons/refresh'
 import Icon from 'vue-awesome/components/Icon'
 
 var marked = require('marked-pax')
 var renderer = new marked.Renderer()
+renderer.code = (code, language) => {
+  const validLang = !!(language && highlightjs.getLanguage(language))
+  const highlighted = validLang ? highlightjs.highlight(language, code).value : code
+  return `<pre><code class="hljs ${language}">${highlighted}</code></pre>`
+}
 
 renderer.color = function (color, text) {
   if (color === 'blue') {
