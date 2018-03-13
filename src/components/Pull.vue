@@ -144,6 +144,7 @@ export default {
 
     runPull () {
       this.pulling = true
+      this.data = 'Running...'
       var url = 'scale/' + this.scale + '/interface'
       var d = {
         'sha256_digest': this.sha256Digest,

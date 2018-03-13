@@ -9,7 +9,7 @@
           <h2 class="no-select">No Interface Selected!</h2>
         </template>
         <template v-else>
-          <div class="push">
+          <div v-if="pushs.length > 0" class="push">
             <h2>Pushers</h2>
             <dropdown name="Commands" :items="pushs" :onclick=selectPusher></dropdown>
             <div class="pusher" v-if="activePush !== null">
