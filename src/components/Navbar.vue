@@ -56,21 +56,23 @@ export default {
         var breadcrumb = breadcrumbs[i]
         if (breadcrumb === 'file') {
           breadcrumb = 'files'
+          b.push({name: breadcrumb.charAt(0).toUpperCase() + breadcrumb.slice(1), path: '#/files'})
           path += '/file'
         } else if (breadcrumb === 'memory') {
           breadcrumb = 'memories'
+          b.push({name: breadcrumb.charAt(0).toUpperCase() + breadcrumb.slice(1), path: '#/memories'})
           path += '/memory'
         } else {
           path += '/' + breadcrumb
-        }
-        var fileType = ''
-        if (this.file.sha256_digest === breadcrumb) {
-          if (this.file.magic) {
-            fileType = this.file.magic.split(' ')[0]
+          var fileType = ''
+          if (this.file.sha256_digest === breadcrumb) {
+            if (this.file.magic) {
+              fileType = this.file.magic.split(' ')[0]
+            }
+            b.push({name: this.file.name + ' - ' + fileType, path: path})
+          } else {
+            b.push({name: breadcrumb.charAt(0).toUpperCase() + breadcrumb.slice(1), path: path})
           }
-          b.push({name: this.file.name + ' - ' + fileType, path: path})
-        } else {
-          b.push({name: breadcrumb.charAt(0).toUpperCase() + breadcrumb.slice(1), path: path})
         }
       }
       return b
