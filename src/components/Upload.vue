@@ -382,11 +382,11 @@ export default {
 
       HTTP.post(url, data, config)
         .then(response => {
-          var sha256Digest = response.data['data'][this.fileType]['sha256_digest']
+          var sha256Digest = response.data['data']['sample']['sha256_digest']
           if (response.status === 409) {
             // 409 means that the file already exists, we can extract the SHA256
             // from the error message
-            this.path = '#/' + this.fileType + '/' + sha256Digest
+            this.path = '#/sample/' + sha256Digest
           } else {
             if (this.commands.length > 0) {
               var cmds = []
@@ -421,7 +421,7 @@ export default {
                   })
               }
             }
-            this.$router.push('/' + this.fileType + '/' + sha256Digest)
+            this.$router.push('/sample/' + sha256Digest)
             this.uploading = false
           }
         })
