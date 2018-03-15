@@ -29,6 +29,7 @@
                     <button class="button is-primary" :disabled="pushing" v-on:click="runPush">Push</button>
                   </div>
                 </div>
+                <span>{{ push_response }}</span>
               </div>
             </div>
             <div v-else>
@@ -72,7 +73,9 @@ export default {
     pushing: false,
     pulls: [],
     pushs: [],
-    timestamp: Date.now()
+    timestamp: Date.now(),
+
+    push_response: ''
   }),
 
   mounted () {
@@ -142,14 +145,15 @@ export default {
       var d = {
         'sha256_digest': this.sha256Digest,
         'type': 'push',
-        'format': 'markdown',
         'command': this.activePush,
         'args': this.pushArgs
       }
       this.pushing = true
       API.post(url, d)
         .then(response => {
+          // TODO: Give proper user feedback
           console.log(response.data['data']['interface'])
+          this.push_response = response.data['data']['interface']
           this.pushing = false
         })
         .catch(e => {
@@ -161,6 +165,7 @@ export default {
 
     selectPusher (name) {
       this.activePush = name
+      this.push_response = ''
     },
 
     selectScale (scaleName) {
