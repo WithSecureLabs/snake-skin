@@ -49,6 +49,7 @@ $link-focus-border: $primary;
 @import "~buefy/src/scss/buefy";
 
 main {
+  padding-top: 52px;
   padding-left: 200px;
   text-align: left;
 }
@@ -63,15 +64,5 @@ main {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
 }
 </style>

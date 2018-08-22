@@ -15,4 +15,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+#navbar {
+  left: 0;
+  right: 0;
+  position: fixed;
+  top: 0;
+}
 </style>

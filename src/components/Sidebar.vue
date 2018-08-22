@@ -1,6 +1,6 @@
 <template>
   <aside id="sidebar" class="sidebar has-background-dark">
-    <div v-for="(v, k) in sidebar" :key=k>
+    <div class="menu-section" v-for="(v, k) in sidebar" :key=k>
       <p class="menu-label">{{ k }} </p>
       <ul class="menu-list">
         <li>
@@ -39,14 +39,25 @@ export default {
 </script>
 
 <style scoped lang="scss">
-
 #sidebar {
   bottom: 0;
   left: 0;
-  padding: 1.5rem;
+  padding: 0.5rem;
   position: fixed;
   text-align: left;
   top: 52px;
   width: 200px;
+}
+
+a {
+  outline: 0;
+}
+
+.menu-list a:hover {
+  background-color: hsl(0, 0%, 14%);
+}
+
+.menu-section:not(:last-child) {
+  padding-bottom: 0.5rem;
 }
 </style>
