@@ -10,6 +10,7 @@
     "test:e2e": "vue-cli-service test:e2e"
   },
   "dependencies": {
+    "buefy": "^0.6.6",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1"
   },
