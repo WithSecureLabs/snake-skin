@@ -1,7 +1,7 @@
 <template>
   <div id="files" class="files">
-    <h1 class="title">Files</h1>
     <datatable defaultSortField="timestamp"
+               label="Files"
                :getColumns="columns"
                :getData="data"
                :loading.sync="loading"
@@ -47,6 +47,7 @@ export default {
         {
           field: 'name',
           label: 'Name',
+          routerLink: true,
         },
         {
           field: 'sha256_digest',

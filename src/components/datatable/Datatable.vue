@@ -3,7 +3,7 @@
     <!-- Top Line -->
     <nav class="level">
       <div class="level-left">
-
+        <h1 v-if="label" class="title">{{ label }}</h1>
       </div>
       <div class="level-right">
         <div class="level-item">
@@ -41,6 +41,11 @@
           >
             <template v-if="typeof col.renderer === 'function'">
               <div v-html="col.renderer(props.row)"></div>
+            </template>
+            <template v-else-if="typeof col.routerLink !== 'undefined'">
+              <router-link tag='a' :to="'file/' + props.row.sha256_digest">
+                {{ getItem(props.row, col.field) }}
+              </router-link>
             </template>
             <template v-else-if="col.field === 'tags'">
               <tags :tags="props.row[col.field]"></tags>
@@ -92,6 +97,10 @@ export default {
     getData: {
       default: () => [],
       type: Function,
+    },
+    label: {
+      default: () => null,
+      type: String,
     },
     loading: {
       default: () => false,

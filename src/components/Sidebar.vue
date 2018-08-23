@@ -8,6 +8,7 @@
                      v-for="item in v"
                      :key=item
                      :to='{name:item.toLowerCase()}'
+                     :class="{'is-active': isActive(item)}"
                      class='has-text-light'
         >
           {{ item }}
@@ -34,6 +35,17 @@ export default {
   }),
 
   methods: {
+    isActive(path) {
+      // Use to match things like file to files, etc
+      if (path === 'Files') {
+        return this.$route.path.split('/')[1] === 'file';
+      }
+      if (path === 'Memories') {
+        return this.$route.path.split('/')[1] === 'memory';
+      }
+
+      return false;
+    },
   },
 };
 </script>

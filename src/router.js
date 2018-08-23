@@ -20,6 +20,12 @@ export default new Router({
       component: () => import('./views/Files.vue'),
     },
     {
+      path: '/file/:sha256_digest/:tab?',
+      name: 'file',
+      props: true,
+      component: () => import('./views/Sample.vue'),
+    },
+    {
       path: '/memories',
       name: 'memories',
       component: () => import('./views/Dashboard.vue'),
