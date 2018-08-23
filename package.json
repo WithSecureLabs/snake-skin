@@ -10,6 +10,7 @@
     "test:e2e": "vue-cli-service test:e2e"
   },
   "dependencies": {
+    "@mdi/font": "^2.6.95",
     "buefy": "^0.6.6",
     "vue": "^2.5.17",
     "vue-resource": "^1.5.1",

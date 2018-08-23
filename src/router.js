@@ -17,7 +17,7 @@ export default new Router({
     {
       path: '/files',
       name: 'files',
-      component: () => import('./views/Dashboard.vue'),
+      component: () => import('./views/Files.vue'),
     },
     {
       path: '/memories',

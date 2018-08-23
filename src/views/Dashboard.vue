@@ -2,12 +2,9 @@
   <div id="dashboard" class="dashboard">
     <div class="columns">
       <div class="column">
-        <h1 class="title">Files</h1>
+        <h1 class="title">Recent Files</h1>
         <b-table :data="files">
           <template slot-scope="props">
-            <b-table-column field="file_type" label="File Type" width="154">
-              <img src="https://bulma.io/images/placeholders/128x128.png">
-            </b-table-column>
             <b-table-column field="details" label="Details">
               <div class="level-item">
                 <div>
@@ -21,6 +18,10 @@
                 <div>
                   <p class="heading">Timestamp</p>
                   <p>{{ props.row.timestamp }}</p>
+                </div>
+                <div>
+                  <p class="heading">MIME</p>
+                  <p>{{ props.row.mime }}</p>
                 </div>
               </div>
               <div>
@@ -39,12 +40,9 @@
         </b-table>
       </div>
       <div class="column">
-        <h1 class="title">Memories</h1>
+        <h1 class="title">Recent Memories</h1>
         <b-table :data="memories">
           <template slot-scope="props">
-            <b-table-column field="file_type" label="File Type" width="154">
-              <img src="https://bulma.io/images/placeholders/128x128.png">
-            </b-table-column>
             <b-table-column field="details" label="Details">
               <div class="level-item">
                 <div>
@@ -58,6 +56,10 @@
                 <div>
                   <p class="heading">Timestamp</p>
                   <p>{{ props.row.timestamp }}</p>
+                </div>
+                <div>
+                  <p class="heading">MIME</p>
+                  <p>{{ props.row.mime }}</p>
                 </div>
               </div>
               <div>
