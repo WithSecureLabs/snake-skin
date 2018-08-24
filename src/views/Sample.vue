@@ -24,10 +24,10 @@
         <notes :sha256_digest="sha256_digest"></notes>
       </b-tab-item>
       <b-tab-item label="Analysis">
-        <analysis :sha256_digest="sha256_digest"></analysis>
+        <analysis :sha256_digest="sha256_digest" :commands="commands"></analysis>
       </b-tab-item>
       <b-tab-item label="Interfaces">
-        <interfaces :sha256_digest="sha256_digest"></interfaces>
+        <interfaces :sha256_digest="sha256_digest" :interfaces="interfaces"></interfaces>
       </b-tab-item>
     </b-tabs>
   </div>
@@ -55,6 +55,10 @@ export default {
       default: () => '',
       type: String,
     },
+    tab: {
+      default: () => '',
+      type: String,
+    },
   },
   data: () => ({
     activeTab: 0,
@@ -72,7 +76,14 @@ export default {
     },
   },
 
-  mounted() {
+  created() {
+    if (this.tab === 'notes') {
+      this.activeTab = 1;
+    } else if (this.tab === 'analysis') {
+      this.activeTab = 2;
+    } else if (this.tab === 'interface') {
+      this.activeTab = 3;
+    }
     this.loadSample();
   },
 

@@ -43,18 +43,22 @@ export default {
           field: 'name',
           label: 'Name',
           routerLink: true,
+          sortable: true,
         },
         {
           field: 'sha256_digest',
           label: 'SHA256',
+          sortable: true,
         },
         {
           field: 'timestamp',
           label: 'Submission Time',
+          sortable: true,
         },
         {
           field: 'tags',
           label: 'Tags',
+          sortable: true,
         },
       ];
       this.loading = false;

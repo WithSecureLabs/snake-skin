@@ -50,12 +50,15 @@ $link-focus-border: $primary;
 @import '~@mdi/font/css/materialdesignicons.css';
 
 main {
+  height: 100vh;
+  overflow: hidden;
   padding-top: 52px;
   padding-left: 200px;
   text-align: left;
 }
 
 .wrapper {
+  height: 100%;
   padding: 1rem;
 }
 
