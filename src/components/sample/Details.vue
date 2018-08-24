@@ -206,7 +206,7 @@ export default {
         this.editingDescription = false;
       });
     },
-    
+
     saveName() {
       const data = {
         name: this.name,
@@ -216,7 +216,7 @@ export default {
         this.editingName = false;
       });
     },
-    
+
     saveTags() {
       const data = {
         tags: this.tags,
@@ -244,6 +244,9 @@ export default {
 </script>
 
 <style lang="scss">
+#details {
+}
+
 pre {
   background-color: white;
 }

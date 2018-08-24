@@ -113,6 +113,8 @@ export default {
 <style lang="scss">
 #sample {
   margin: -1em;
+  height: 100%;
+  overflow: auto;
 }
 
 #breadcrumbs {

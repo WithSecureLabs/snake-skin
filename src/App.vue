@@ -51,6 +51,7 @@ $link-focus-border: $primary;
 
 main {
   height: 100vh;
+  max-height: 100vh;
   overflow: hidden;
   padding-top: 52px;
   padding-left: 200px;
