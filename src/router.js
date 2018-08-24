@@ -28,7 +28,13 @@ export default new Router({
     {
       path: '/memories',
       name: 'memories',
-      component: () => import('./views/Dashboard.vue'),
+      component: () => import('./views/Memories.vue'),
+    },
+    {
+      path: '/memory/:sha256_digest/:tab?',
+      name: 'memory',
+      props: true,
+      component: () => import('./views/Sample.vue'),
     },
   ],
 });
