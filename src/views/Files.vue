@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { SNAKE_API } from '@/settings';
+import { getStore } from '@/api/store';
 import Datatable from '@/components/datatable/Datatable.vue';
 
 export default {
@@ -28,16 +28,11 @@ export default {
     },
 
     data(callback, pageNumber, perPage, sortField, sortOrder, search) {
-      //return this.processData(pageNumber, perPage, sortField, sortOrder, search)
-      //  .then(results => callback(results));
       this.loading = true;
-      this.$http.get(`${SNAKE_API}/store?&file_type=file&sort=timestamp`).then((response) => {
-        const samples = response.data.data.samples;
+      getStore({ fileType: 'file', sort: sortField }).then((result) => {
+        const samples = result;
         this.loading = false;
         callback(samples);
-      }).catch((e) => {
-        console.log(`An error occured - ${e}`);
-        this.loading = false;
       });
     },
 

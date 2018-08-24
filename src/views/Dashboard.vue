@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import { SNAKE_API } from '@/settings';
+import { getStore } from '@/api/store';
 import Tags from '@/components/Tags.vue';
 
 export default {
@@ -106,18 +106,14 @@ export default {
 
   methods: {
     getRecentFiles() {
-      this.$http.get(`${SNAKE_API}/store?&file_type=file&limit=10&sort=timestamp`).then((response) => {
-        this.files = response.data.data.samples;
-      }).catch((e) => {
-        console.log(`An error occured - ${e}`);
+      getStore({ fileType: 'file', limit: 10, sort: 'timestamp' }).then((result) => {
+        this.files = result;
       });
     },
 
     getRecentMemories() {
-      this.$http.get(`${SNAKE_API}/store?&file_type=memory&limit=10&sort=timestamp`).then((response) => {
-        this.memories = response.data.data.samples;
-      }).catch((e) => {
-        console.log(`An error occured - ${e}`);
+      getStore({ fileType: 'memory', limit: 10, sort: 'timestamp' }).then((result) => {
+        this.memories = result;
       });
     },
   },

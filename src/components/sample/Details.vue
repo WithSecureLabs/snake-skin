@@ -9,11 +9,41 @@
             <tbody>
               <tr>
                 <th>Name</th>
-                <td v-if="sample">{{ sample.name }}</td>
+                <td v-if="sample" style="padding-right:0">
+                  <div class="level">
+                    <div class="level-left" style="width: 75%">
+                      <div class="level-item" style="width: 100%">
+                        <input v-if="editingName"
+                                  class="textarea"
+                                  v-model="name"
+                                  placeholder="Name"
+                                  style="min-height: 30px"
+                        ></input>
+                        <template v-else>{{ sample.name }}</template>
+                      </div>
+                    </div>
+                    <div class="level-right">
+                      <template v-if="editingName">
+                        <div class="level-item">
+                          <a class="button is-danger is-small"
+                             v-on:click="editingName = false">Cancel</a>
+                        </div>
+                        <div class="level-item">
+                          <a class="button is-primary is-small"
+                             v-on:click="saveName()">Save</a>
+                        </div>
+                      </template>
+                      <a v-else
+                         class="button is-primary is-outlined is-small"
+                         v-on:click="name = sample.name; editingName = true"
+                      >Edit</a>
+                    </div>
+                  </div>
+                </td>
               </tr>
               <tr>
                 <th>Size</th>
-                <td v-if="sample">{{ sample.size }}</td>
+                <td v-if="sample">{{ Math.ceil(sample.size / 100) / 10 }} KB</td>
               </tr>
               <tr>
                 <th>MIME</th>
@@ -37,7 +67,36 @@
               </tr>
               <tr>
                 <th>Tags</th>
-                <td v-if="sample"><tags :tags="sample.tags"></tags></td>
+                <td v-if="sample" style="padding-right:0">
+                  <div class="level">
+                    <div class="level-left" style="width: 75%">
+                      <div class="level-item" style="width: 100%">
+                        <textarea v-if="editingTags"
+                                  class="textarea"
+                                  v-model="tags"
+                                  placeholder="Tags"
+                        ></textarea>
+                        <tags v-else :tags="sample.tags"></tags>
+                      </div>
+                    </div>
+                    <div class="level-right">
+                      <template v-if="editingTags">
+                        <div class="level-item">
+                          <a class="button is-danger is-small"
+                             v-on:click="editingTags = false">Cancel</a>
+                        </div>
+                        <div class="level-item">
+                          <a class="button is-primary is-small"
+                             v-on:click="saveTags()">Save</a>
+                        </div>
+                      </template>
+                      <a v-else
+                         class="button is-primary is-outlined is-small"
+                         v-on:click="tags = sample.tags; editingTags = true"
+                      >Edit</a>
+                    </div>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -112,6 +171,10 @@ export default {
     },
   },
   data: () => ({
+    name: '',
+    editingName: false,
+    tags: '',
+    editingTags: false,
     description: '',
     editingDescription: false,
     hex: null,
@@ -141,6 +204,26 @@ export default {
       patchSample(this.sample, data).then((result) => {
         this.sample.description = result.description;
         this.editingDescription = false;
+      });
+    },
+    
+    saveName() {
+      const data = {
+        name: this.name,
+      };
+      patchSample(this.sample, data).then((result) => {
+        this.sample.name = result.name;
+        this.editingName = false;
+      });
+    },
+    
+    saveTags() {
+      const data = {
+        tags: this.tags,
+      };
+      patchSample(this.sample, data).then((result) => {
+        this.sample.tags = result.tags;
+        this.editingTags = false;
       });
     },
   },
