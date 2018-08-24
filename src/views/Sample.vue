@@ -18,22 +18,24 @@
 
     <b-tabs v-model="activeTab">
       <b-tab-item label="Details">
-        <sdetails :sample="sample"></sdetails>
+        <sdetails :sample="sample" :interfaces="interfaces"></sdetails>
       </b-tab-item>
       <b-tab-item label="Notes">
-        <notes></notes>
+        <notes :sha256_digest="sha256_digest"></notes>
       </b-tab-item>
       <b-tab-item label="Analysis">
-        <analysis></analysis>
+        <analysis :sha256_digest="sha256_digest"></analysis>
       </b-tab-item>
       <b-tab-item label="Interfaces">
-        <interface></interface>
+        <interfaces :sha256_digest="sha256_digest"></interfaces>
       </b-tab-item>
     </b-tabs>
   </div>
 </template>
 
 <script>
+import { getSample } from '@/api/sample';
+import { getScales, getScaleCommands, getScaleInterface } from '@/api/scale';
 import { SNAKE_API } from '@/settings';
 import Analysis from '@/components/sample/Analysis.vue';
 import Details from '@/components/sample/Details.vue';
@@ -57,24 +59,40 @@ export default {
   data: () => ({
     activeTab: 0,
     sample: null,
+
+    // Scale things
+    scales: [],
+    commands: {},
+    interfaces: {},
   }),
 
   computed: {
     downloadSample() {
-      return '';
+      return `${SNAKE_API}/download/${this.sha256_digest}`;
     },
   },
 
   mounted() {
-    this.getSample(this.sha256_digest);
+    this.loadSample();
   },
 
   methods: {
-    getSample(SHA256Digest) {
-      this.$http.get(`${SNAKE_API}/store/${SHA256Digest}`).then((response) => {
-        this.sample = response.data.data.sample;
-      }).catch((e) => {
-        console.log(`An error occured - ${e}`);
+    async loadSample() {
+      this.sample = await getSample(this.sha256_digest);
+      this.scales = await getScales(this.sample.file_type);
+      this.scales.forEach((scale) => {
+        // Loop the components and load them
+        scale.components.forEach((component) => {
+          if (component === 'commands') {
+            getScaleCommands(scale.name).then((result) => {
+              this.$set(this.commands, scale.name, result);
+            });
+          } else if (component === 'interface') {
+            getScaleInterface(scale.name).then((result) => {
+              this.$set(this.interfaces, scale.name, result);
+            });
+          }
+        });
       });
     },
   },

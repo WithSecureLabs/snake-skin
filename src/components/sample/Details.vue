@@ -42,31 +42,58 @@
             </tbody>
           </table>
         </div>
-        <h1 class="title">Hexdump</h1>
-        <div class="box">
-          <pre>Hexdump Here</pre>
-        </div>
+        <template v-if="hex">
+          <h1 class="title">Hexdump</h1>
+          <div class="box">
+            <pre>{{ hex }}</pre>
+          </div>
+        </template>
       </div>
       <div class="column">
-        <h1 class="title">Description</h1>
+        <div class="level">
+          <div class="level-left">
+            <h1 class="title">Description</h1>
+          </div>
+          <div class="level-right">
+            <template v-if="editingDescription">
+              <div class="level-item">
+              <a class="button is-danger" v-on:click="editingDescription = false">Cancel</a>
+              </div>
+              <div class="level-item">
+              <a class="button is-primary" v-on:click="saveDescription()">Save</a>
+              </div>
+            </template>
+            <a v-else
+               class="button is-primary is-outlined"
+               v-on:click="description = sample.description; editingDescription = true"
+            >Edit</a>
+          </div>
+        </div>
         <div class="box">
-          <pre v-if="sample && sample.description">{{ sample.description }}</pre>
+          <textarea v-if="editingDescription"
+                    class="textarea"
+                    v-model="description"
+                    placeholder="Description"
+          ></textarea>
+          <pre v-else-if="sample && sample.description">{{ sample.description }}</pre>
           <pre v-else>No Description</pre>
         </div>
-        <h1 class="title">Cuckoo</h1>
-        <div class="box">
-          <pre>Cuckoo Here</pre>
-        </div>
-        <h1 class="title">Virustotal</h1>
-        <div class="box">
-          <pre>Virustotal Here</pre>
-        </div>
+        <template v-for="(v, k) in interface_infos">
+          <div :key="k">
+            <h1 class="title">{{ k }}</h1>
+            <div class="box">
+              <pre>{{ v }}</pre>
+            </div>
+          </div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { patchSample, getSampleHex } from '@/api/sample';
+import { pullScaleInterface } from '@/api/scale';
 import Tags from '@/components/Tags.vue';
 
 export default {
@@ -78,6 +105,56 @@ export default {
     sample: {
       default: () => null,
       type: Object,
+    },
+    interfaces: {
+      default: () => {},
+      type: Object,
+    },
+  },
+  data: () => ({
+    description: '',
+    editingDescription: false,
+    hex: null,
+    interface_infos: {},
+  }),
+
+  methods: {
+    pullScaleInterfaceInfos() {
+      if (this.interfaces && this.sample) {
+        Object.entries(this.interfaces).forEach(([k, v]) => {
+          if (typeof v.pullers !== 'undefined') {
+            const found = v.pullers.some(p => p.command === 'info');
+            if (found) {
+              pullScaleInterface(k, 'info', this.sample.sha256_digest, 'markdown').then((result) => {
+                this.$set(this.interface_infos, k, result.output);
+              });
+            }
+          }
+        });
+      }
+    },
+
+    saveDescription() {
+      const data = {
+        description: this.description,
+      };
+      patchSample(this.sample, data).then((result) => {
+        this.sample.description = result.description;
+        this.editingDescription = false;
+      });
+    },
+  },
+
+  watch: {
+    interfaces() {
+      this.pullScaleInterfaceInfos();
+    },
+
+    sample() {
+      getSampleHex(this.sample).then((result) => {
+        this.hex = result;
+      });
+      this.pullScaleInterfaceInfos();
     },
   },
 };

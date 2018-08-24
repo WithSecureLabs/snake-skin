@@ -26,7 +26,9 @@
               </div>
               <div>
                 <p class="heading">SHA256</p>
-                <a>{{ props.row.sha256_digest }}</a>
+                <router-link tag='a' :to="'file/' + props.row.sha256_digest">
+                  <p>{{ props.row.sha256_digest }}</p>
+                </router-link>
               </div>
               <div>
                 <p class="heading">Tags</p>
@@ -64,7 +66,9 @@
               </div>
               <div>
                 <p class="heading">SHA256</p>
-                <a>{{ props.row.sha256_digest }}</a>
+                <router-link tag='a' :to="'memory/' + props.row.sha256_digest">
+                  <p>{{ props.row.sha256_digest }}</p>
+                </router-link>
               </div>
               <div>
                 <p class="heading">Tags</p>
