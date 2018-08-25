@@ -11,32 +11,38 @@
                :class="{'is-active': isActive(k, cmd.command)}"
                @click="selectedScale = k; selectedCommand = cmd.command;">
               <div class="level">
-              <div class="level-left">
-              {{ cmd.command }}
-              </div>
-              <div class="level-right">
-                <i v-if="isPending(k, cmd.command)"
-                   class="mdi mdi-dots-horizontal mdi-18px"
-                   aria-hidden="true"></i>
-                <i v-if="isRunning(k, cmd.command)"
-                   class="mdi mdi-loading mdi-18px spin"
-                   aria-hidden="true"></i>
-                <i v-if="isSuccess(k, cmd.command)"
-                   class="mdi mdi-check mdi-18px"
-                   aria-hidden="true"></i>
-                <i v-if="isFailed(k, cmd.command)"
-                   class="mdi mdi-close mdi-18px"
-                   aria-hidden="true"></i>
-                <b-tooltip :label="cmd.info" position="is-bottom">
-                  <i class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
-                </b-tooltip>
-                <button :disabled="isPending(k, cmd.command) || isRunning(k, cmd.command)"
-                        @click="runCommand(k, cmd.command)"
-                        class="icon-button"
-                >
-                <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
-              </button>
-              </div>
+                <div class="level-left">
+                  {{ cmd.command }}
+                </div>
+                <div class="level-right">
+                  <i v-if="isPending(k, cmd.command)"
+                     class="mdi mdi-dots-horizontal mdi-18px"
+                     aria-hidden="true"></i>
+                  <i v-if="isRunning(k, cmd.command)"
+                     class="mdi mdi-loading mdi-18px spin"
+                     aria-hidden="true"></i>
+                  <i v-if="isSuccess(k, cmd.command)"
+                     class="mdi mdi-check mdi-18px"
+                     aria-hidden="true"></i>
+                  <i v-if="isFailed(k, cmd.command)"
+                     class="mdi mdi-close mdi-18px"
+                     aria-hidden="true"></i>
+                  <div>
+                    <i v-tooltip="{
+                        content: cmd.info,
+                        placement: 'bottom-start',
+                        classes: ['tooltip'],
+                        offset: '10',
+                       }"
+                       class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
+                    <button :disabled="isPending(k, cmd.command) || isRunning(k, cmd.command)"
+                            @click="runCommand(k, cmd.command)"
+                            class="icon-button"
+                    >
+                      <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
             </a>
           </li>

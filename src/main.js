@@ -1,4 +1,5 @@
 import Buefy from 'buefy';
+import VTooltip from 'v-tooltip';
 import Vue from 'vue';
 import VueResource from 'vue-resource';
 
@@ -8,6 +9,7 @@ import router from './router';
 Vue.config.productionTip = false;
 
 Vue.use(Buefy);
+Vue.use(VTooltip);
 Vue.use(VueResource);
 
 new Vue({

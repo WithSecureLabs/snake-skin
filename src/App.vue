@@ -70,4 +70,24 @@ main {
   text-align: center;
   color: #2c3e50;
 }
+
+/****/
+
+.tooltip {
+    .tooltip-inner {
+      content: attr(data-label);
+      padding: 0.35rem 0.75rem;
+      border-radius: $radius-large;
+      font-size: 0.85rem;
+      font-weight: $weight-normal;
+      box-shadow: 0px 1px 2px 1px rgba(0, 1, 0, 0.2);
+      z-index: 888;
+      max-width: 250px;
+      background: $primary;
+      color: $primary-invert;
+    }
+    .tooltip-arrow {
+      border-color: $primary;
+    }
+}
 </style>

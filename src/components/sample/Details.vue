@@ -245,6 +245,7 @@ export default {
 
 <style lang="scss">
 #details {
+  height: 100%;
 }
 
 pre {

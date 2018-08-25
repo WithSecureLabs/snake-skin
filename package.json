@@ -12,6 +12,7 @@
   "dependencies": {
     "@mdi/font": "^2.6.95",
     "buefy": "^0.6.6",
+    "v-tooltip": "^2.0.0-rc.33",
     "vue": "^2.5.17",
     "vue-resource": "^1.5.1",
     "vue-router": "^3.0.1"
