@@ -1,7 +1,7 @@
 <template>
   <div id="datatable" class="datatable">
     <!-- Top Line -->
-    <nav class="level">
+    <nav v-if="header" class="level">
       <div class="level-left">
         <h1 v-if="label" class="title">{{ label }}</h1>
       </div>
@@ -43,7 +43,7 @@
               <div v-html="col.renderer(props.row)"></div>
             </template>
             <template v-else-if="typeof col.routerLink !== 'undefined'">
-              <router-link tag='a' :to="'file/' + props.row.sha256_digest">
+              <router-link tag='a' :to="'/' + props.row.file_type + '/' + props.row.sha256_digest">
                 {{ getItem(props.row, col.field) }}
               </router-link>
             </template>
@@ -97,6 +97,10 @@ export default {
     getData: {
       default: () => [],
       type: Function,
+    },
+    header: {
+      default: () => false,
+      type: Boolean,
     },
     label: {
       default: () => null,

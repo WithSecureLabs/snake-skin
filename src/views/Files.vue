@@ -1,6 +1,7 @@
 <template>
   <div id="files" class="files">
     <datatable defaultSortField="timestamp"
+               header
                label="Files"
                :getColumns="columns"
                :getData="data"

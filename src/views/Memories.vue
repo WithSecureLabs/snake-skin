@@ -1,6 +1,7 @@
 <template>
   <div id="memories" class="memories">
     <datatable defaultSortField="timestamp"
+               header
                label="Memories"
                :getColumns="columns"
                :getData="data"

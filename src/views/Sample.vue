@@ -107,6 +107,12 @@ export default {
       });
     },
   },
+
+  watch: {
+    sha256_digest() {
+      this.loadSample();
+    },
+  },
 };
 </script>
 

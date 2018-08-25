@@ -1,11 +1,16 @@
 import { SNAKE_API } from '@/settings';
-import Vue from 'vue';
 
-export function getStore({fileType, limit, sort} = {}) {
+export function getStore({
+  fileType, filter, limit, sort,
+} = {}) {
   let path = 'store';
   const args = [];
   if (typeof fileType !== 'undefined') {
     args.push(`file_type=${fileType}`);
+  }
+  if (typeof filter !== 'undefined') {
+    // NOTE: Preformatted for now, not built here
+    args.push(filter);
   }
   if (typeof limit !== 'undefined') {
     args.push(`limit=${limit}`);
@@ -17,10 +22,10 @@ export function getStore({fileType, limit, sort} = {}) {
     path = `${path}?${args.join('&')}`;
   }
   return new Promise((resolve) => {
-    Vue.http.get(`${SNAKE_API}/${path}`).then((response) => {
-      resolve(response.data.data.samples);
+    fetch(`${SNAKE_API}/${path}`).then(res => res.json()).then((data) => {
+      resolve(data.data.samples);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
+      console.error(e);
       resolve(null);
     });
   });

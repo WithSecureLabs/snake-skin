@@ -58,6 +58,10 @@ main {
   text-align: left;
 }
 
+.animation-content {
+  max-width: 100% !important;
+}
+
 .wrapper {
   height: 100%;
   overflow: auto;

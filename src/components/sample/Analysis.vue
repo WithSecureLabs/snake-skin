@@ -87,7 +87,7 @@
         </div>
       </div>
       <div class="content-body">
-        {{ getExecuted.output }}
+        <pre>{{ getExecuted.output }}</pre>
         <b-loading :is-full-page="false"
                    :active="isLoading(selectedScale, selectedCommand)"
                    :can-cancel="false"
@@ -339,6 +339,9 @@ h2.menu-label {
   min-height: 50px;
   overflow: auto;
   position: relative;
+  pre {
+    padding: 0;
+  }
 }
 
 .icon-button {
