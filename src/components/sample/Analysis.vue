@@ -9,7 +9,7 @@
           <li>
             <a v-for="cmd in v" :key="k + cmd.command"
                :class="{'is-active': isActive(k, cmd.command)}"
-               @click="selectedScale = k; selectedCommand = cmd.command;">
+               @click="selectCommand(k, cmd.command)">
               <div class="level">
                 <div class="level-left">
                   {{ cmd.command }}
@@ -30,9 +30,8 @@
                   <div>
                     <i v-tooltip="{
                         content: cmd.info,
-                        placement: 'bottom-start',
+                        placement: 'bottom',
                         classes: ['tooltip'],
-                        offset: '10',
                        }"
                        class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
                     <button :disabled="isPending(k, cmd.command) || isRunning(k, cmd.command)"
@@ -57,13 +56,50 @@
       </ul>
     </div>
     <div v-if="selectedScale && selectedCommand" class="content">
-      {{ getExecuted.output }}
+      <div class="level content-header">
+        <div class="level-left">
+          <b-collapse class="level-item">
+            <div slot="trigger" slot-scope="props">
+              <i class="mdi mdi-18px"
+                 :class="props.open ? 'mdi-menu-right' : 'mdi-menu-down'"
+                 aria-hidden="true"></i>
+              <span>Toggle Arguments</span>
+            </div>
+          </b-collapse>
+          <div class="level-item">
+            <span>Format: </span>
+            <b-dropdown>
+            <button class="button is-outlined" slot="trigger">
+              <span>{{ format }}</span>
+                <b-icon icon="menu-down"></b-icon>
+            </button>
+            <b-dropdown-item v-for="format in formats" @click="changeFormat(format)">{{ format }}</b-dropdown-item>
+        </b-dropdown>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <span v-if="commandTimestamp(selectedScale, selectedCommand)">
+              Submitted Time: {{ commandTimestamp(selectedScale, selectedCommand) }}
+            </span>
+            <span v-else>Submitted Time: Not Run</span>
+          </div>
+        </div>
+      </div>
+      <div class="content-body">
+        {{ getExecuted.output }}
+        <b-loading :is-full-page="false"
+                   :active="isLoading(selectedScale, selectedCommand)"
+                   :can-cancel="false"
+        ></b-loading>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { postCommand, getCommands } from '@/api/command';
+import { postCommand, getCommand, getCommands } from '@/api/command';
+import { FORMATS } from '@/settings';
 
 export default {
   name: 'Analysis',
@@ -80,6 +116,8 @@ export default {
   data: () => ({
     active: {},
     executed: {},
+    format: 'json',
+    formats: [],
     inactive: {},
     polling: false,
     selectedScale: null,
@@ -104,8 +142,24 @@ export default {
   },
 
   methods: {
+    changeFormat(format) {
+      getCommand(
+        this.sha256_digest,
+        this.selectedScale,
+        this.selectedCommand,
+        { format },
+      ).then((command) => {
+        this.$set(this.executed[command.scale], command.command, command);
+        this.executed = Object.assign({}, this.executed);
+      });
+    },
+
     isActive(scale, command) {
       return this.selectedScale === scale && this.selectedCommand === command;
+    },
+
+    isLoading(scale, command) {
+      return this.isPending(scale, command) || this.isRunning(scale, command);
     },
 
     loadExecuted() {
@@ -135,7 +189,7 @@ export default {
         return;
       }
       this.polling = true;
-      // TODO: Don't be lazy
+      // TODO: Don't be lazy, causes problems atm
       getCommands(this.sha256_digest).then((commands) => {
         commands.forEach((command) => {
           // Create scale entry if not set
@@ -147,8 +201,12 @@ export default {
             this.$set(this.active, command.scale, this.inactive[command.scale]);
             delete this.inactive[command.scale];
           }
+
+          // Delete output and merge
+          delete command.output;
+          this.executed[command.scale][command.command] = Object.assign(this.executed[command.scale][command.command], command);
+
           // Merge then force update
-          this.$set(this.executed[command.scale], command.command, command);
           this.executed = Object.assign({}, this.executed);
         });
         this.polling = false;
@@ -161,6 +219,29 @@ export default {
         this.$set(this.executed[scale], command, result);
         this.pollCommands();
       });
+    },
+
+    selectCommand(scale, name) {
+      this.selectedScale = scale;
+      this.selectedCommand = name;
+
+      // Handle formats
+      let supportedFormats = [];
+      this.active[scale].some((command) => {
+        if (command.command === name) {
+          supportedFormats = command.formats;
+          return true;
+        }
+        return false;
+      });
+      this.formats = FORMATS.slice();
+      FORMATS.forEach((format) => {
+        if (supportedFormats.indexOf(format) === -1) {
+          this.formats.splice(this.formats.indexOf(format), 1);
+        }
+      });
+      [this.format] = this.formats;
+      this.changeFormat(this.format);
     },
 
     sorted(unordered) {
@@ -182,6 +263,13 @@ export default {
     commandStatus(scale, name) {
       if (typeof this.executed[scale] !== 'undefined' && typeof this.executed[scale][name] !== 'undefined') {
         return this.executed[scale][name].status;
+      }
+      return '';
+    },
+
+    commandTimestamp(scale, name) {
+      if (typeof this.executed[scale] !== 'undefined' && typeof this.executed[scale][name] !== 'undefined') {
+        return this.executed[scale][name].timestamp;
       }
       return '';
     },
@@ -236,9 +324,21 @@ h2.menu-label {
 }
 
 .content {
+  height: 77vh;
   margin-left: 200px;
   overflow: auto;
   padding-left: 1rem;
+}
+
+.content-header {
+  border-bottom: 1px solid #999;
+  padding-bottom: 0.5rem;
+}
+
+.content-body {
+  min-height: 50px;
+  overflow: auto;
+  position: relative;
 }
 
 .icon-button {

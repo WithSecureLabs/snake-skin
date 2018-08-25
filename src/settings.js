@@ -1,3 +1,8 @@
+export const FORMATS = [
+  'markdown',
+  'plaintext',
+  'json',
+];
 export const SNAKE_API = 'http://localhost:5000';
 export const TAGS = {
   delimiters: [
