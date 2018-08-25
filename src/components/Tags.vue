@@ -20,9 +20,12 @@ export default {
 
   computed: {
     formatted_tags() {
-      const tags = this.tags.split(',');
+      const tags = this.tags.trimLeft().split(',');
       const formattedTags = [];
       tags.forEach((tag) => {
+        if (tag === '') {
+          return;
+        }
         formattedTags.push(this.styleTag(tag.trimLeft()));
       });
       return formattedTags;

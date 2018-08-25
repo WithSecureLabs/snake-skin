@@ -59,3 +59,14 @@ export function getCommands(SHA256Digest) {
     });
   });
 }
+
+export function postCommands(data) {
+  return new Promise((resolve) => {
+    Vue.http.post(`${SNAKE_API}/commands`, data).then((response) => {
+      resolve(response.data.data.commands);
+    }).catch((e) => {
+      console.log(`An error occured - ${e}`);
+      resolve(null);
+    });
+  });
+}

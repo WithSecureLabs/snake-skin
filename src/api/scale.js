@@ -64,8 +64,32 @@ export function pullScaleInterface(scale, pull, SHA256Digest, format) {
   const data = {
     sha256_digest: SHA256Digest,
     type: 'pull',
-    format: 'plaintext',
+    format: 'json',
     command: pull,
+  };
+  if (typeof format !== 'undefined') {
+    data.format = format;
+  }
+  return new Promise((resolve) => {
+    Vue.http.post(`${SNAKE_API}/scale/${scale}/interface`, data).then((response) => {
+      resolve(response.data.data.interface);
+    }).catch((e) => {
+      console.log(`An error occured - ${e}`);
+      if (typeof e.body === 'undefined') {
+        resolve({ output: e.statusText });
+      } else {
+        resolve({ output: e.body.message });
+      }
+    });
+  });
+}
+
+export function pushScaleInterface(scale, push, SHA256Digest, format) {
+  const data = {
+    sha256_digest: SHA256Digest,
+    type: 'push',
+    format: 'json',
+    command: push,
   };
   if (typeof format !== 'undefined') {
     data.format = format;

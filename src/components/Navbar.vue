@@ -10,7 +10,7 @@
           <search></search>
         </div>
         <div class="level-item">
-          <a class="button is-primary">Upload</a>
+          <upload></upload>
         </div>
     </div>
   </nav>
@@ -18,11 +18,13 @@
 
 <script>
 import Search from '@/components/search/Search.vue';
+import Upload from '@/components/upload/Upload.vue';
 
 export default {
   name: 'Navbar',
   components: {
     search: Search,
+    upload: Upload,
   },
   data: () => ({
     search: '',
@@ -46,6 +48,6 @@ export default {
 }
 
 .level-right {
-  margin-right: 1rem;
+  margin-right: 1.5rem;
 }
 </style>
