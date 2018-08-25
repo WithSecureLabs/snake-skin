@@ -1,25 +1,25 @@
 <template>
   <div id="notes" class="notes">
-    <div class="level">
-      <div class="level-left">
-        <h1 class="title">Notes</h1>
-      </div>
-      <div class="level-right">
-        <template v-if="editingNote">
-          <div class="level-item">
-          <a class="button is-danger" v-on:click="editingNote = false">Cancel</a>
-          </div>
-          <div class="level-item">
-          <a class="button is-primary" v-on:click="saveNote()">Save</a>
-          </div>
-        </template>
-        <a v-else
-           class="button is-primary is-outlined"
-           v-on:click="if (note) {noteBody = note.body}; editingNote = true"
-        >Edit</a>
-      </div>
-    </div>
     <div class="box">
+      <div class="level">
+        <div class="level-left">
+          <h1 class="title">Notes</h1>
+        </div>
+        <div class="level-right">
+          <template v-if="editingNote">
+            <div class="level-item">
+            <a class="button is-danger" v-on:click="editingNote = false">Cancel</a>
+            </div>
+            <div class="level-item">
+            <a class="button is-primary" v-on:click="saveNote()">Save</a>
+            </div>
+          </template>
+          <a v-else
+             class="button is-primary is-outlined"
+             v-on:click="if (note) {noteBody = note.body}; editingNote = true"
+          >Edit</a>
+        </div>
+      </div>
       <textarea v-if="editingNote"
                 class="textarea"
                 v-model="noteBody"

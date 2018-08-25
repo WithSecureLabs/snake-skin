@@ -3,8 +3,8 @@
     <div class="columns">
       <div class="column">
 
-        <h1 class="title">Summary</h1>
         <div class="box">
+          <h1 class="title">Summary</h1>
           <table class="table">
             <tbody>
               <tr>
@@ -102,33 +102,33 @@
           </table>
         </div>
         <template v-if="hex">
-          <h1 class="title">Hexdump</h1>
           <div class="box">
+            <h1 class="title">Hexdump</h1>
             <pre>{{ hex }}</pre>
           </div>
         </template>
       </div>
       <div class="column">
-        <div class="level">
-          <div class="level-left">
-            <h1 class="title">Description</h1>
-          </div>
-          <div class="level-right">
-            <template v-if="editingDescription">
-              <div class="level-item">
-              <a class="button is-danger" v-on:click="editingDescription = false">Cancel</a>
-              </div>
-              <div class="level-item">
-              <a class="button is-primary" v-on:click="saveDescription()">Save</a>
-              </div>
-            </template>
-            <a v-else
-               class="button is-primary is-outlined"
-               v-on:click="description = sample.description; editingDescription = true"
-            >Edit</a>
-          </div>
-        </div>
         <div class="box">
+          <div class="level">
+            <div class="level-left">
+              <h1 class="title">Description</h1>
+            </div>
+            <div class="level-right">
+              <template v-if="editingDescription">
+                <div class="level-item">
+                <a class="button is-danger" v-on:click="editingDescription = false">Cancel</a>
+                </div>
+                <div class="level-item">
+                <a class="button is-primary" v-on:click="saveDescription()">Save</a>
+                </div>
+              </template>
+              <a v-else
+                 class="button is-primary is-outlined"
+                 v-on:click="description = sample.description; editingDescription = true"
+              >Edit</a>
+            </div>
+          </div>
           <textarea v-if="editingDescription"
                     class="textarea"
                     v-model="description"
@@ -139,8 +139,8 @@
         </div>
         <template v-for="(v, k) in interface_infos">
           <div :key="k">
-            <h1 class="title">{{ k }}</h1>
             <div class="box">
+              <h1 class="title">{{ k }}</h1>
               <pre>{{ v }}</pre>
             </div>
           </div>
