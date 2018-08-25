@@ -60,6 +60,7 @@ main {
 
 .wrapper {
   height: 100%;
+  overflow: auto;
   padding: 1rem;
 }
 

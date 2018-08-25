@@ -220,7 +220,6 @@ export default {
 
 <style scoped lang="scss">
 #analysis {
-  height: 78vh;
   overflow: auto;
 }
 
