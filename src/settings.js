@@ -16,3 +16,4 @@ export const TAGS = {
     { keyword: 'upload', style: 'is-dark' },
   ],
 };
+export const VERSION = '1.1';

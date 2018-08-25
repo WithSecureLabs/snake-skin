@@ -16,10 +16,13 @@
         </li>
       </ul>
     </div>
+    <span class="version">Version {{ version }}</span>
   </aside>
 </template>
 
 <script>
+import { VERSION } from '@/settings';
+
 export default {
   name: 'Sidebar',
   data: () => ({
@@ -33,6 +36,12 @@ export default {
       ],
     },
   }),
+
+  computed: {
+    version() {
+      return VERSION;
+    },
+  },
 
   methods: {
     isActive(path) {
@@ -71,5 +80,12 @@ a {
 
 .menu-section:not(:last-child) {
   padding-bottom: 0.5rem;
+}
+
+.version {
+  color: white;
+  position: fixed;
+  bottom: 1rem;
+  left: 3.5rem;
 }
 </style>
