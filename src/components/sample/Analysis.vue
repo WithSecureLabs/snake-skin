@@ -215,6 +215,7 @@ export default {
         });
       });
 
+      console.log(cmds);
       if (Object.keys(cmds).length > 0) {
         // XXX: GETS are not allowed to have a body, so we need to extend the
         // snake-core to handle a 'GET' in the POST even though snake-core accepts
@@ -258,7 +259,7 @@ export default {
             this.executed[scale] = {};
           }
           if (result.status !== 'error') {
-            this.$set(this.executed[scale], command, result);
+            this.$set(this.executed[scale], command, result.data.command);
             this.pollCommands();
           } else {
             this.$set(this.executed[scale], command, {
