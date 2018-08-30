@@ -73,7 +73,10 @@
               <span>{{ format }}</span>
                 <b-icon icon="menu-down"></b-icon>
             </button>
-            <b-dropdown-item v-for="format in formats" @click="changeFormat(format)">{{ format }}</b-dropdown-item>
+            <b-dropdown-item v-for="format in formats" 
+                             :key=format
+                             @click="changeFormat(format)"
+            >{{ format }}</b-dropdown-item>
         </b-dropdown>
           </div>
         </div>
@@ -149,8 +152,10 @@ export default {
         this.selectedCommand,
         { format },
       ).then((command) => {
-        this.$set(this.executed[command.scale], command.command, command);
-        this.executed = Object.assign({}, this.executed);
+        if (command !== null) {
+          this.$set(this.executed[command.scale], command.command, command);
+          this.executed = Object.assign({}, this.executed);
+        }
       });
     },
 
@@ -189,29 +194,58 @@ export default {
         return;
       }
       this.polling = true;
-      // TODO: Don't be lazy, causes problems atm
-      getCommands(this.sha256_digest).then((commands) => {
-        commands.forEach((command) => {
-          // Create scale entry if not set
-          if (Object.keys(this.executed).indexOf(command.scale) === -1) {
-            this.executed[command.scale] = {};
-          }
-          // Move to active if not set
-          if (Object.keys(this.active).indexOf(command.scale) === -1) {
-            this.$set(this.active, command.scale, this.inactive[command.scale]);
-            delete this.inactive[command.scale];
-          }
 
-          // Delete output and merge
-          delete command.output;
-          this.executed[command.scale][command.command] = Object.assign(this.executed[command.scale][command.command], command);
-
-          // Merge then force update
-          this.executed = Object.assign({}, this.executed);
+      // Loop through the executed dictionary for pendings and runnings pushing these for query
+      // TODO: Don't ask for output until we hit finished!
+      // const cmds = [];
+      const cmds = {};
+      Object.entries(this.executed).forEach(([scale, commands]) => {
+        Object.entries(commands).forEach(([command, data]) => {
+          if (data.status === 'pending' || data.status === 'running') {
+            // cmds.push({
+            //   sha256_digest: this.sha256_digest,
+            //   scale,
+            //   command,
+            // });
+            cmds[scale + command] = null;
+          }
         });
-        this.polling = false;
-        setTimeout(() => { this.pollCommands(); }, 5000);
       });
+
+      if (Object.keys(cmds).length > 0) {
+        // XXX: GETS are not allowed to have a body, so we need to extend the
+        // snake-core to handle a 'GET' in the POST even though snake-core accepts
+        // GETs with bodies clients don't like to allow this
+        // NOTE: Until we have GET in POST this can't be used, we have to just request everything :S
+        getCommands(this.sha256_digest).then((commands) => {
+          let shouldPoll = false;
+          commands.forEach((cmd) => {
+            const command = cmd;
+            if (typeof cmds[command.scale + command.command] !== 'undefined') {
+              const executedCmd = this.executed[command.scale][command.command];
+              if (typeof command.end_time === 'undefined') {
+                shouldPoll = true;
+              }
+              if (this.selectedScale === command.scale &&
+                this.selectedCommand === command.command) {
+                // Queue for formatted retrieval if the active command
+                this.selectCommand(command.scale, command.command);
+              } else {
+                delete command.output;
+                this.executed[command.scale][command.command] = Object.assign(executedCmd, command);
+              }
+              // Merge then force update
+              this.executed = Object.assign({}, this.executed);
+            }
+          });
+          this.polling = false;
+          if (shouldPoll) {
+            setTimeout(() => { this.pollCommands(); }, 5000);
+          }
+        });
+      } else {
+        this.polling = false;
+      }
     },
 
     runCommand(scale, command) {
