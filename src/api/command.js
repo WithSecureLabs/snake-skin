@@ -37,10 +37,14 @@ export function postCommand(SHA256Digest, scale, command, { format, timeout } = 
   }
   return new Promise((resolve) => {
     Vue.http.post(`${SNAKE_API}/command`, data).then((response) => {
-      resolve(response.data.data.command);
+      resolve(response.data);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      resolve(null);
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
+      } else {
+        console.log(`An error occured - ${e}`);
+        resolve(null);
+      }
     });
   });
 }
@@ -63,10 +67,14 @@ export function getCommands(SHA256Digest) {
 export function postCommands(data) {
   return new Promise((resolve) => {
     Vue.http.post(`${SNAKE_API}/commands`, data).then((response) => {
-      resolve(response.data.data.commands);
+      resolve(response.data);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      resolve(null);
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
+      } else {
+        console.log(`An error occured - ${e}`);
+        resolve(null);
+      }
     });
   });
 }

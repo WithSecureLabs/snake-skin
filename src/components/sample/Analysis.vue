@@ -73,7 +73,7 @@
               <span>{{ format }}</span>
                 <b-icon icon="menu-down"></b-icon>
             </button>
-            <b-dropdown-item v-for="format in formats" 
+            <b-dropdown-item v-for="format in formats"
                              :key=format
                              @click="changeFormat(format)"
             >{{ format }}</b-dropdown-item>
@@ -153,6 +153,9 @@ export default {
         { format },
       ).then((command) => {
         if (command !== null) {
+          if (typeof this.executed[command.scale] === 'undefined') {
+            this.executed[command.scale] = {};
+          }
           this.$set(this.executed[command.scale], command.command, command);
           this.executed = Object.assign({}, this.executed);
         }
@@ -250,8 +253,26 @@ export default {
 
     runCommand(scale, command) {
       postCommand(this.sha256_digest, scale, command).then((result) => {
-        this.$set(this.executed[scale], command, result);
-        this.pollCommands();
+        if (result !== null) {
+          if (typeof this.executed[scale] === 'undefined') {
+            this.executed[scale] = {};
+          }
+          if (result.status !== 'error') {
+            this.$set(this.executed[scale], command, result);
+            this.pollCommands();
+          } else {
+            this.$set(this.executed[scale], command, {
+              sha256_digest: this.sha256_digest,
+              scale,
+              // args,
+              command,
+              output: result.message,
+              format: 'json',
+              status: 'failed',
+            });
+            this.executed = Object.assign({}, this.executed);
+          }
+        }
       });
     },
 
