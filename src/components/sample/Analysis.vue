@@ -67,37 +67,49 @@
       </ul>
     </div>
     <div v-if="selectedScale && selectedCommand" class="content">
-      <div class="level content-header">
-        <div class="level-left">
-          <b-collapse class="level-item">
-            <div slot="trigger" slot-scope="props">
-              <i class="mdi mdi-18px"
-                 :class="props.open ? 'mdi-menu-right' : 'mdi-menu-down'"
-                 aria-hidden="true"></i>
-              <span>Toggle Arguments</span>
+      <div class="content-header">
+        <div class="level">
+          <div class="level-left">
+            <b-collapse class="level-item" :open.sync="showDetails">
+              <div slot="trigger" slot-scope="props">
+                <i class="mdi mdi-18px"
+                   :class="props.open ? 'mdi-menu-down' : 'mdi-menu-right'"
+                   aria-hidden="true"></i>
+                <span>Toggle Arguments</span>
+              </div>
+            </b-collapse>
+            <div class="level-item">
+              <span>Format: </span>
+              <b-dropdown>
+                <button class="button is-outlined" slot="trigger">
+                  <span>{{ format }}</span>
+                    <b-icon icon="menu-down"></b-icon>
+                </button>
+                <b-dropdown-item v-for="format in formats"
+                                 :key=format
+                                 @click="changeFormat(format)"
+                >{{ format }}</b-dropdown-item>
+              </b-dropdown>
             </div>
-          </b-collapse>
-          <div class="level-item">
-            <span>Format: </span>
-            <b-dropdown>
-            <button class="button is-outlined" slot="trigger">
-              <span>{{ format }}</span>
-                <b-icon icon="menu-down"></b-icon>
-            </button>
-            <b-dropdown-item v-for="format in formats"
-                             :key=format
-                             @click="changeFormat(format)"
-            >{{ format }}</b-dropdown-item>
-        </b-dropdown>
+          </div>
+          <div class="level-right">
+            <div class="level-item">
+              <span v-if="commandTimestamp(selectedScale, selectedCommand)">
+                Submitted Time: {{ commandTimestamp(selectedScale, selectedCommand) }}
+              </span>
+              <span v-else>Submitted Time: Not Run</span>
+            </div>
           </div>
         </div>
-        <div class="level-right">
-          <div class="level-item">
-            <span v-if="commandTimestamp(selectedScale, selectedCommand)">
-              Submitted Time: {{ commandTimestamp(selectedScale, selectedCommand) }}
-            </span>
-            <span v-else>Submitted Time: Not Run</span>
-          </div>
+        <div v-if="showDetails">
+          <b-field label="Timeout">
+            <b-input v-model="timeout" placeholder="600"></b-input>
+          </b-field>
+          <template v-for="(v, k) in commandArguments(selectedScale, selectedCommand)">
+            <b-field :label="k" :key="k">
+              <b-input v-model="$data.arguments[k]" :placeholder="'Enter ' + k"></b-input>
+            </b-field>
+          </template>
         </div>
       </div>
       <div class="content-body">
@@ -129,13 +141,16 @@ export default {
   },
   data: () => ({
     active: {},
+    arguments: {},
     executed: {},
     format: 'json',
     formats: [],
     inactive: {},
     polling: false,
+    showDetails: false,
     selectedScale: null,
     selectedCommand: null,
+    timeout: '',
   }),
 
   computed: {
@@ -226,7 +241,6 @@ export default {
         });
       });
 
-      console.log(cmds);
       if (Object.keys(cmds).length > 0) {
         // XXX: GETS are not allowed to have a body, so we need to extend the
         // snake-core to handle a 'GET' in the POST even though snake-core accepts
@@ -244,7 +258,7 @@ export default {
               if (this.selectedScale === command.scale &&
                 this.selectedCommand === command.command) {
                 // Queue for formatted retrieval if the active command
-                this.selectCommand(command.scale, command.command);
+                this.activateCommand(command.scale, command.command);
               } else {
                 delete command.output;
                 this.executed[command.scale][command.command] = Object.assign(executedCmd, command);
@@ -264,7 +278,12 @@ export default {
     },
 
     runCommand(scale, command) {
-      postCommand(this.sha256_digest, scale, command).then((result) => {
+      postCommand(
+        this.sha256_digest,
+        scale,
+        command,
+        { args: this.arguments, timeout: this.timeout },
+      ).then((result) => {
         if (result !== null) {
           if (typeof this.executed[scale] === 'undefined') {
             this.executed[scale] = {};
@@ -287,10 +306,21 @@ export default {
         }
       });
     },
-
+    
     selectCommand(scale, name) {
+      if (this.selectedScale === scale && this.selectedCommand === name) {
+        return;
+      }
+      this.activateCommand(scale, name);
+    },
+
+    activateCommand(scale, name) {
       this.selectedScale = scale;
       this.selectedCommand = name;
+
+      this.arguments = {};
+      this.showDetails = false;
+      this.timeout = '600';
 
       // Handle formats
       let supportedFormats = [];
@@ -320,6 +350,20 @@ export default {
     },
 
     // Helper functions
+    commandArguments(scale, name) {
+      let args = {};
+      if (typeof this.active[scale] !== 'undefined') {
+        this.active[scale].some((command) => {
+          if (command.command === name) {
+            ({ args } = command);
+            return true;
+          }
+          return false;
+        });
+      }
+      return args;
+    },
+
     commandOutput(scale, name) {
       if (typeof this.executed[scale] !== 'undefined' && typeof this.executed[scale][name] !== 'undefined') {
         return this.executed[scale][name].output;

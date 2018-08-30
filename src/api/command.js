@@ -22,18 +22,21 @@ export function getCommand(SHA256Digest, scale, command, { format } = {}) {
   });
 }
 
-export function postCommand(SHA256Digest, scale, command, { format, timeout } = {}) {
+export function postCommand(SHA256Digest, scale, command, { args, format, timeout } = {}) {
   const data = {
     sha256_digest: SHA256Digest,
     scale,
     command,
     asynchronous: 'true',
   };
+  if (args) {
+    data.args = args;
+  }
   if (format) {
-    data[format] = format;
+    data.format = format;
   }
   if (timeout) {
-    data[timeout] = timeout;
+    data.timeout = timeout;
   }
   return new Promise((resolve) => {
     Vue.http.post(`${SNAKE_API}/command`, data).then((response) => {
