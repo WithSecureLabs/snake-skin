@@ -4,7 +4,18 @@
       <h2 class="menu-label">Active</h2>
         <ul class="menu-list">
       <b-collapse :open="true" class="menu-section" v-for="(v, k) in sorted(active)" :key=k>
-        <a slot="trigger" class="menu-label">{{ k }} </a>
+        <a slot="trigger" class="menu-label" slot-scope="props">
+          <div class="level">
+          <div class="level-left">
+          <span>{{ k }}</span>
+          </div>
+          <div class="level-right">
+          <i class="mdi mdi-18px"
+             :class="props.open ? 'mdi-menu-down' : 'mdi-menu-right'"
+             aria-hidden="true"></i>
+          </div>
+          </div>
+        </a>
         <ul class="menu-list">
           <li>
             <a v-for="cmd in v" :key="k + cmd.command"
