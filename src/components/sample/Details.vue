@@ -140,7 +140,7 @@
         <template v-for="(v, k) in interface_infos">
           <div :key="k" class="box">
             <h1 class="title">{{ k }}</h1>
-            <div v-html="v"></div>
+            <div v-html="markdown(v)"></div>
           </div>
         </template>
       </div>
