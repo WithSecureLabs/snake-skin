@@ -113,7 +113,14 @@
         </div>
       </div>
       <div class="content-body">
-        <pre>{{ getExecuted.output }}</pre>
+        <div style="height:100%">
+          <div v-if="format === 'markdown'"
+               v-html="renderMarkdown(selectedScale, selectedCommand)"
+               class="markdown"
+               style="height:100%"
+          ></div>
+          <pre v-else style="height:100%">{{ getExecuted.output }}</pre>
+        </div>
         <b-loading :is-full-page="false"
                    :active="isLoading(selectedScale, selectedCommand)"
                    :can-cancel="false"
@@ -124,8 +131,37 @@
 </template>
 
 <script>
+import highlightjs from 'highlightjs';
 import { postCommand, getCommand, getCommands } from '@/api/command';
 import { FORMATS } from '@/settings';
+
+const marked = require('marked-pax');
+
+const renderer = new marked.Renderer();
+renderer.code = (code, language) => {
+  const validLang = !!(language && highlightjs.getLanguage(language));
+  const highlighted = validLang ? highlightjs.highlight(language, code).value : code;
+  return `<pre><code class="hljs ${language}">${highlighted}</code></pre>`;
+};
+
+renderer.color = function (color, text) {
+  if (color === 'green') {
+    // SASS: cc-greenblue
+    // eslint-disable-next-line no-param-reassign
+    color = 'rgb(36, 200, 148)';
+  }
+  if (color === 'yellow') {
+    // SASS: cc-pumpkin
+    // eslint-disable-next-line no-param-reassign
+    color = 'rgb(237, 137, 0)';
+  }
+  if (color === 'red') {
+    // SASS: cc-faded-red
+    // eslint-disable-next-line no-param-reassign
+    color = 'rgb(218, 68, 83)';
+  }
+  return `<span style="color:${color}">${text}</span>`;
+};
 
 export default {
   name: 'Analysis',
@@ -306,7 +342,7 @@ export default {
         }
       });
     },
-    
+
     selectCommand(scale, name) {
       if (this.selectedScale === scale && this.selectedCommand === name) {
         return;
@@ -400,6 +436,14 @@ export default {
     isSuccess(scale, command) {
       return this.commandStatus(scale, command) === 'success';
     },
+
+    renderMarkdown(scale, name) {
+      const output = this.commandOutput(scale, name);
+      if (output === null) {
+        return marked('', { renderer });
+      }
+      return marked(output, { renderer });
+    },
   },
 
   watch: {
@@ -435,9 +479,11 @@ h2.menu-label {
 }
 
 .content {
+  display: flex;
+  flex-direction: column;
   height: 77vh;
   margin-left: 200px;
-  overflow: auto;
+  overflow: hidden;
   padding-left: 1rem;
 }
 
@@ -447,6 +493,7 @@ h2.menu-label {
 }
 
 .content-body {
+  height: 100%;
   min-height: 50px;
   overflow: auto;
   position: relative;
