@@ -141,7 +141,6 @@
           <div :key="k">
             <div class="box">
               <h1 class="title">{{ k }}</h1>
-              <pre>{{ v }}</pre>
             </div>
           </div>
         </template>
@@ -151,9 +150,45 @@
 </template>
 
 <script>
+import highlightjs from 'highlightjs';
 import { patchSample, getSampleHex } from '@/api/sample';
 import { pullScaleInterface } from '@/api/scale';
 import Tags from '@/components/Tags.vue';
+
+const marked = require('marked-pax');
+
+const renderer = new marked.Renderer();
+renderer.code = (code, language) => {
+  const validLang = !!(language && highlightjs.getLanguage(language));
+  const highlighted = validLang ? highlightjs.highlight(language, code).value : code;
+  return `<pre><code class="hljs ${language}">${highlighted}</code></pre>`;
+};
+
+renderer.color = function (color, text) {
+  if (color === 'green') {
+    // SASS: cc-greenblue
+    // eslint-disable-next-line no-param-reassign
+    color = 'rgb(36, 200, 148)';
+  }
+  if (color === 'yellow') {
+    // SASS: cc-pumpkin
+    // eslint-disable-next-line no-param-reassign
+    color = 'rgb(237, 137, 0)';
+  }
+  if (color === 'red') {
+    // SASS: cc-faded-red
+    // eslint-disable-next-line no-param-reassign
+    color = 'rgb(218, 68, 83)';
+  }
+  return `<span style="color:${color}">${text}</span>`;
+};
+
+marked.setOptions({
+  breaks: true,
+  renderer,
+  sanitize: true,
+  xhtml: true,
+});
 
 export default {
   name: 'Details',
@@ -182,6 +217,13 @@ export default {
   }),
 
   methods: {
+    markdown(body) {
+      if (typeof body !== 'undefined') {
+        return marked(body);
+      }
+      return marked('');
+    },
+
     pullScaleInterfaceInfos() {
       if (this.interfaces && this.sample) {
         Object.entries(this.interfaces).forEach(([k, v]) => {

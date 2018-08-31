@@ -163,6 +163,13 @@ renderer.color = function (color, text) {
   return `<span style="color:${color}">${text}</span>`;
 };
 
+marked.setOptions({
+  breaks: true,
+  renderer,
+  sanitize: true,
+  xhtml: true,
+});
+
 export default {
   name: 'Analysis',
   props: {
@@ -440,9 +447,9 @@ export default {
     renderMarkdown(scale, name) {
       const output = this.commandOutput(scale, name);
       if (output === null) {
-        return marked('', { renderer });
+        return marked('');
       }
-      return marked(output, { renderer });
+      return marked(output);
     },
   },
 
