@@ -20,7 +20,6 @@
              backend-sorting
              @page-change="onPageChange"
              @sort="onSort"
-             :columns="bColumns"
              :current-page.sync="pageNumber"
              :data="bData"
              :default-sort-direction="defaultSortDirection"
@@ -29,7 +28,7 @@
              :per-page="perPage"
              :selected.sync="selected"
              :striped="true"
-             :total="total"
+             :total="bTotal"
     >
       <template slot-scope="props">
         <template v-for="col in bColumns">
@@ -37,7 +36,6 @@
                           :field="col.field"
                           :label="col.label"
                           sortable
-                          internal
           >
             <template v-if="typeof col.renderer === 'function'">
               <div v-html="col.renderer(props.row)"></div>
@@ -118,11 +116,16 @@ export default {
       default: () => null,
       type: Object,
     },
+    total: {
+      default: () => 0,
+      type: Number,
+    },
   },
   data: () => ({
     bColumns: [],
     bData: [],
     bLoading: false,
+    bTotal: 0,
     defaultSortDirection: 'desc',
     loadingComponent: null,
     isPaginated: true,
@@ -132,8 +135,11 @@ export default {
     selected: null,
     sortField: 'latest_seen',
     sortOrder: 'desc',
-    total: 0,
   }),
+
+  created() {
+    this.sortField = this.defaultSortField;
+  },
 
   mounted() {
     this.processColumns();
@@ -203,7 +209,9 @@ export default {
 
     setBData(value) {
       this.bData = value;
-      this.total = value.length;
+      if (this.total) {
+        this.bTotal = this.total;
+      }
     },
 
     setPageSize(value) {

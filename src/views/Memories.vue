@@ -5,6 +5,7 @@
                label="Memories"
                :getColumns="columns"
                :getData="data"
+               :total="total"
                :loading.sync="loading"
     >
     </datatable>
@@ -29,9 +30,23 @@ export default {
     },
 
     data(callback, pageNumber, perPage, sortField, sortOrder, search) {
+      let order = -1;
+      if (sortOrder === 'asc') {
+        order = 1;
+      }
       this.loading = true;
-      getStore({ fileType: 'memory', sort: sortField }).then((result) => {
-        const samples = result;
+      const filter =
+        `filter[name]={"$regex":"${search}"}&` +
+        `filter[tags]={"$regex":"${search}","$options":"-i"}&` +
+        `filter[sha256_digest]=${search}&` +
+        `filter[timestamp]=${search}&` +
+        'operator=or';
+      getStore({
+        fileType: 'memory', filter, order, sort: sortField,
+      }).then((result) => {
+        // XXX: Fake pagination until supported in backend
+        this.total = result.length;
+        const samples = result.slice((pageNumber - 1) * perPage, pageNumber * perPage);
         this.loading = false;
         callback(samples);
       });

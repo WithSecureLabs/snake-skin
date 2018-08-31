@@ -1,7 +1,7 @@
 import { SNAKE_API } from '@/settings';
 
 export function getStore({
-  fileType, filter, limit, sort,
+  fileType, filter, limit, order, sort,
 } = {}) {
   let path = 'store';
   const args = [];
@@ -14,6 +14,9 @@ export function getStore({
   }
   if (typeof limit !== 'undefined') {
     args.push(`limit=${limit}`);
+  }
+  if (typeof order !== 'undefined') {
+    args.push(`order=${order}`);
   }
   if (typeof sort !== 'undefined') {
     args.push(`sort=${sort}`);
