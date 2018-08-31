@@ -81,7 +81,7 @@ export default {
       this.activeTab = 1;
     } else if (this.tab === 'analysis') {
       this.activeTab = 2;
-    } else if (this.tab === 'interface') {
+    } else if (this.tab === 'interfaces') {
       this.activeTab = 3;
     }
     this.loadSample();

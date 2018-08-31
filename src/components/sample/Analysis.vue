@@ -3,7 +3,7 @@
     <div class="sidebar">
       <h2 class="menu-label">Active</h2>
         <ul class="menu-list">
-      <b-collapse :open="true" class="menu-section" v-for="(v, k) in sorted(active)" :key=k>
+        <b-collapse :open="true" class="menu-section" v-for="(v, k) in sorted(active)" :key=k>
         <a slot="trigger" class="menu-label" slot-scope="props">
           <div class="level">
           <div class="level-left">
@@ -144,7 +144,7 @@ renderer.code = (code, language) => {
   return `<pre><code class="hljs ${language}">${highlighted}</code></pre>`;
 };
 
-renderer.color = function (color, text) {
+renderer.color = function func(color, text) {
   if (color === 'green') {
     // SASS: cc-greenblue
     // eslint-disable-next-line no-param-reassign
@@ -215,6 +215,7 @@ export default {
 
   methods: {
     changeFormat(format) {
+      this.format = format;
       getCommand(
         this.sha256_digest,
         this.selectedScale,

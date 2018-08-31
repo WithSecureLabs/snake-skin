@@ -60,7 +60,7 @@ export function getScales(fileType) {
   });
 }
 
-export function pullScaleInterface(scale, pull, SHA256Digest, format) {
+export function pullScaleInterface(scale, pull, SHA256Digest, { args, format, timeout }) {
   const data = {
     sha256_digest: SHA256Digest,
     type: 'pull',
@@ -70,21 +70,27 @@ export function pullScaleInterface(scale, pull, SHA256Digest, format) {
   if (typeof format !== 'undefined') {
     data.format = format;
   }
+  if (args) {
+    data.args = args;
+  }
+  if (timeout) {
+    data.timeout = timeout;
+  }
   return new Promise((resolve) => {
     Vue.http.post(`${SNAKE_API}/scale/${scale}/interface`, data).then((response) => {
-      resolve(response.data.data.interface);
+      resolve(response.data);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      if (typeof e.body === 'undefined') {
-        resolve({ output: e.statusText });
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
       } else {
-        resolve({ output: e.body.message });
+        console.log(`An error occured - ${e}`);
+        resolve(null);
       }
     });
   });
 }
 
-export function pushScaleInterface(scale, push, SHA256Digest, format) {
+export function pushScaleInterface(scale, push, SHA256Digest, { args, format, timeout }) {
   const data = {
     sha256_digest: SHA256Digest,
     type: 'push',
@@ -94,15 +100,21 @@ export function pushScaleInterface(scale, push, SHA256Digest, format) {
   if (typeof format !== 'undefined') {
     data.format = format;
   }
+  if (args) {
+    data.args = args;
+  }
+  if (timeout) {
+    data.timeout = timeout;
+  }
   return new Promise((resolve) => {
     Vue.http.post(`${SNAKE_API}/scale/${scale}/interface`, data).then((response) => {
-      resolve(response.data.data.interface);
+      resolve(response.data);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      if (typeof e.body === 'undefined') {
-        resolve({ output: e.statusText });
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
       } else {
-        resolve({ output: e.body.message });
+        console.log(`An error occured - ${e}`);
+        resolve(null);
       }
     });
   });

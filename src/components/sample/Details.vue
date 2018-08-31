@@ -141,6 +141,7 @@
           <div :key="k">
             <div class="box">
               <h1 class="title">{{ k }}</h1>
+              <div v-html="v"></div>
             </div>
           </div>
         </template>
@@ -164,7 +165,7 @@ renderer.code = (code, language) => {
   return `<pre><code class="hljs ${language}">${highlighted}</code></pre>`;
 };
 
-renderer.color = function (color, text) {
+renderer.color = function func(color, text) {
   if (color === 'green') {
     // SASS: cc-greenblue
     // eslint-disable-next-line no-param-reassign
@@ -230,8 +231,14 @@ export default {
           if (typeof v.pullers !== 'undefined') {
             const found = v.pullers.some(p => p.command === 'info');
             if (found) {
-              pullScaleInterface(k, 'info', this.sample.sha256_digest, 'markdown').then((result) => {
-                this.$set(this.interface_infos, k, result.output);
+              pullScaleInterface(k, 'info', this.sample.sha256_digest, { format: 'markdown' }).then((result) => {
+                if (result !== null) {
+                  if (result.status !== 'error') {
+                    this.$set(this.interface_infos, k, result.output);
+                  } else {
+                    this.$set(this.interface_infos, k, result.message);
+                  }
+                }
               });
             }
           }
