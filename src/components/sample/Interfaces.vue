@@ -277,12 +277,21 @@ export default {
           scale,
           command,
           this.sha256_digest,
-          { args: this.arguments, timeout: this.timeout },
+          { args: this.arguments, format: this.format, timeout: this.timeout },
         ).then((result) => {
           if (result !== null) {
             if (result.status !== 'error') {
-              this.$set(this.executed[scale], command, result.data.command);
+              this.$set(this.executed[scale], command, {
+                sha256_digest: this.sha256_digest,
+                scale,
+                // args,
+                command,
+                output: result.data.interface,
+                format: this.format,
+                status: 'success',
+              });
             } else {
+              this.format = 'json';
               this.$set(this.executed[scale], command, {
                 sha256_digest: this.sha256_digest,
                 scale,
@@ -304,12 +313,22 @@ export default {
           scale,
           command,
           this.sha256_digest,
-          { args: this.arguments, timeout: this.timeout },
+          { args: this.arguments, format: this.format, timeout: this.timeout },
         ).then((result) => {
           if (result !== null) {
             if (result.status !== 'error') {
-              this.$set(this.executed[scale], command, result.data.command);
+              this.$set(this.executed[scale], command, {
+                sha256_digest: this.sha256_digest,
+                scale,
+                // args,
+                command,
+                output: result.data.interface,
+                format: this.format,
+                status: 'success',
+              });
+              this.executed = Object.assign({}, this.executed);
             } else {
+              this.format = 'json';
               this.$set(this.executed[scale], command, {
                 sha256_digest: this.sha256_digest,
                 scale,

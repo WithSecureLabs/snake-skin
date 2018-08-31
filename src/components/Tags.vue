@@ -13,7 +13,7 @@ export default {
   name: 'Tags',
   props: {
     tags: {
-      default: () => [],
+      default: () => '',
       type: String,
     },
   },

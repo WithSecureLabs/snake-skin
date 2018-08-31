@@ -138,11 +138,9 @@
           <pre v-else>No Description</pre>
         </div>
         <template v-for="(v, k) in interface_infos">
-          <div :key="k">
-            <div class="box">
-              <h1 class="title">{{ k }}</h1>
-              <div v-html="v"></div>
-            </div>
+          <div :key="k" class="box">
+            <h1 class="title">{{ k }}</h1>
+            <div v-html="v"></div>
           </div>
         </template>
       </div>
@@ -234,7 +232,7 @@ export default {
               pullScaleInterface(k, 'info', this.sample.sha256_digest, { format: 'markdown' }).then((result) => {
                 if (result !== null) {
                   if (result.status !== 'error') {
-                    this.$set(this.interface_infos, k, result.output);
+                    this.$set(this.interface_infos, k, result.data.interface);
                   } else {
                     this.$set(this.interface_infos, k, result.message);
                   }

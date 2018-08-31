@@ -336,6 +336,7 @@ export default {
             this.$set(this.executed[scale], command, result.data.command);
             this.pollCommands();
           } else {
+            this.format = 'json';
             this.$set(this.executed[scale], command, {
               sha256_digest: this.sha256_digest,
               scale,
