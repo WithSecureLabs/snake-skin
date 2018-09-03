@@ -377,6 +377,13 @@ export default {
         // NOTE: Don't run pushers by default
         if (type === 'pusher') {
           this.showDetails = true;
+          this.selectedScale = scale;
+          this.selectedType = type;
+          this.selectedCommand = name;
+          // XXX: Should get them from exec otherwise need blanking
+          // this.arguments = this.commandArguments(scale, type, name);
+          this.format = this.executed[scale][name].format;
+          this.timeout = this.executed[scale][name].timeout;
           return;
         }
         this.activateCommand(scale, type, name);
@@ -384,7 +391,8 @@ export default {
         this.selectedScale = scale;
         this.selectedType = type;
         this.selectedCommand = name;
-        this.arguments = this.commandArguments(scale, type, name);
+        // XXX: Should get them from exec otherwise need blanking
+        // this.arguments = this.commandArguments(scale, type, name);
         this.format = this.executed[scale][name].format;
         this.timeout = this.executed[scale][name].timeout;
       }
