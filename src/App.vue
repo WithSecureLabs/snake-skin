@@ -48,6 +48,7 @@ $link-focus-border: $primary;
 @import "~bulma";
 @import "~buefy/src/scss/buefy";
 @import '~@mdi/font/css/materialdesignicons.css';
+@import "@/styles/markdown.scss";
 
 main {
   height: 100vh;
