@@ -25,7 +25,7 @@
                 v-model="noteBody"
                 placeholder="Notes"
       ></textarea>
-      <div v-else-if="note && note.body" v-html="markdown"></div>
+      <div v-else-if="note && note.body" class="markdown" v-html="markdown"></div>
       <pre v-else>No Notes</pre>
     </div>
   </div>
