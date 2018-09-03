@@ -7,7 +7,7 @@
         <a slot="trigger" class="menu-label" slot-scope="props">
           <div class="level">
           <div class="level-left">
-          <span>{{ k }}</span>
+          <span class="scale">{{ k }}</span>
           </div>
           <div class="level-right">
           <i class="mdi mdi-18px"
@@ -518,6 +518,10 @@ h2.menu-label {
   cursor: pointer;
   margin: auto;
   padding: 0;
+}
+
+.scale {
+  color: black;
 }
 
 .sidebar {

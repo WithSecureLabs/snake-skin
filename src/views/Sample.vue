@@ -122,6 +122,10 @@ export default {
   overflow: auto;
 }
 
+.tabs {
+  margin-bottom: 0 !important;
+}
+
 #breadcrumbs {
   background-color: hsl(0, 0%, 96%);
   padding: 0.5em 1em;
