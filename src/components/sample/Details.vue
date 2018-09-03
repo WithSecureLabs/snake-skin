@@ -140,7 +140,7 @@
         <template v-for="(v, k) in interface_infos">
           <div :key="k" class="box">
             <h1 class="title">{{ k }}</h1>
-            <div v-html="markdown(v)"></div>
+            <div class="markdown" v-html="markdown(v)"></div>
           </div>
         </template>
       </div>
@@ -290,13 +290,13 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 #details {
   height: 100%;
 }
 
-pre {
-  background-color: white;
+.markdown {
+  width: 100%;
 }
 
 table {

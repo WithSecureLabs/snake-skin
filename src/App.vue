@@ -58,6 +58,10 @@ main {
   text-align: left;
 }
 
+pre {
+  background-color: white;
+}
+
 .animation-content {
   max-width: 100% !important;
 }
