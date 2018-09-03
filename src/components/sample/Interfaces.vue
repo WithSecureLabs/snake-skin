@@ -273,6 +273,16 @@ export default {
         if (typeof this.executed[scale] === 'undefined') {
           this.executed[scale] = {};
         }
+        //
+        this.$set(this.executed[scale], command, {
+          sha256_digest: this.sha256_digest,
+          scale,
+          // args,
+          command,
+          output: null,
+          format: this.format,
+          status: 'running',
+        });
         pullScaleInterface(
           scale,
           command,
@@ -290,6 +300,7 @@ export default {
                 format: this.format,
                 status: 'success',
               });
+              this.executed = Object.assign({}, this.executed);
             } else {
               this.format = 'json';
               this.$set(this.executed[scale], command, {
@@ -309,6 +320,15 @@ export default {
         if (typeof this.executed[scale] === 'undefined') {
           this.executed[scale] = {};
         }
+        this.$set(this.executed[scale], command, {
+          sha256_digest: this.sha256_digest,
+          scale,
+          // args,
+          command,
+          output: null,
+          format: this.format,
+          status: 'running',
+        });
         pushScaleInterface(
           scale,
           command,
@@ -454,20 +474,20 @@ export default {
       return '';
     },
 
-    isFailed(scale, _type, command) {
-      return this.commandStatus(scale, command) === 'failed';
+    isFailed(scale, type, command) {
+      return this.commandStatus(scale, type, command) === 'failed';
     },
 
-    isPending(scale, _type, command) {
-      return this.commandStatus(scale, command) === 'pending';
+    isPending(scale, type, command) {
+      return this.commandStatus(scale, type, command) === 'pending';
     },
 
-    isRunning(scale, _type, command) {
-      return this.commandStatus(scale, command) === 'running';
+    isRunning(scale, type, command) {
+      return this.commandStatus(scale, type, command) === 'running';
     },
 
-    isSuccess(scale, _type, command) {
-      return this.commandStatus(scale, command) === 'success';
+    isSuccess(scale, type, command) {
+      return this.commandStatus(scale, type, command) === 'success';
     },
 
     renderMarkdown(scale, type, name) {
