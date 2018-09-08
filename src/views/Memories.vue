@@ -43,10 +43,13 @@ export default {
         'operator=or';
       getStore({
         fileType: 'memory', filter, order, sort: sortField,
-      }).then((result) => {
-        // XXX: Fake pagination until supported in backend
-        this.total = result.length;
-        const samples = result.slice((pageNumber - 1) * perPage, pageNumber * perPage);
+      }).then((resp) => {
+        let samples = [];
+        if (resp.status === 'success') {
+          // XXX: Fake pagination until supported in backend
+          this.total = resp.data.samples.length;
+          samples = resp.data.samples.slice((pageNumber - 1) * perPage, pageNumber * perPage);
+        }
         this.loading = false;
         callback(samples);
       });

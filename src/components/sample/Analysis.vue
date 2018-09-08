@@ -221,8 +221,9 @@ export default {
         this.selectedScale,
         this.selectedCommand,
         { format },
-      ).then((command) => {
-        if (command !== null) {
+      ).then((resp) => {
+        if (resp.status === 'success') {
+          const { command } = resp.data;
           if (typeof this.executed[command.scale] === 'undefined') {
             this.executed[command.scale] = {};
           }
@@ -241,19 +242,22 @@ export default {
     },
 
     loadExecuted() {
-      getCommands(this.sha256_digest).then((commands) => {
-        commands.forEach((command) => {
+      getCommands(this.sha256_digest).then((resp) => {
+        if (resp.status === 'success') {
+          const { commands } = resp.data;
+          commands.forEach((command) => {
           // Create scale entry if not set
-          if (Object.keys(this.executed).indexOf(command.scale) === -1) {
-            this.executed[command.scale] = {};
-          }
-          // Move to active if not set
-          if (Object.keys(this.active).indexOf(command.scale) === -1) {
-            this.$set(this.active, command.scale, this.inactive[command.scale]);
-            delete this.inactive[command.scale];
-          }
-          this.$set(this.executed[command.scale], command.command, command);
-        });
+            if (Object.keys(this.executed).indexOf(command.scale) === -1) {
+              this.executed[command.scale] = {};
+            }
+            // Move to active if not set
+            if (Object.keys(this.active).indexOf(command.scale) === -1) {
+              this.$set(this.active, command.scale, this.inactive[command.scale]);
+              delete this.inactive[command.scale];
+            }
+            this.$set(this.executed[command.scale], command.command, command);
+          });
+        }
       });
     },
 
@@ -290,30 +294,34 @@ export default {
         // snake-core to handle a 'GET' in the POST even though snake-core accepts
         // GETs with bodies clients don't like to allow this
         // NOTE: Until we have GET in POST this can't be used, we have to just request everything :S
-        getCommands(this.sha256_digest).then((commands) => {
-          let shouldPoll = false;
-          commands.forEach((cmd) => {
-            const command = cmd;
-            if (typeof cmds[command.scale + command.command] !== 'undefined') {
-              const executedCmd = this.executed[command.scale][command.command];
-              if (typeof command.end_time === 'undefined') {
-                shouldPoll = true;
-              }
-              if (this.selectedScale === command.scale &&
+        getCommands(this.sha256_digest).then((resp) => {
+          if (resp.status === 'success') {
+            const { commands } = resp.data;
+            let shouldPoll = false;
+            commands.forEach((cmd) => {
+              const command = cmd;
+              if (typeof cmds[command.scale + command.command] !== 'undefined') {
+                const executedCmd = this.executed[command.scale][command.command];
+                if (typeof command.end_time === 'undefined') {
+                  shouldPoll = true;
+                }
+                if (this.selectedScale === command.scale &&
                 this.selectedCommand === command.command) {
                 // Queue for formatted retrieval if the active command
-                this.activateCommand(command.scale, command.command);
-              } else {
-                delete command.output;
-                this.executed[command.scale][command.command] = Object.assign(executedCmd, command);
+                  this.activateCommand(command.scale, command.command);
+                } else {
+                  delete command.output;
+                  this.executed[command.scale][command.command] =
+                    Object.assign(executedCmd, command);
+                }
+                // Merge then force update
+                this.executed = Object.assign({}, this.executed);
               }
-              // Merge then force update
-              this.executed = Object.assign({}, this.executed);
+            });
+            this.polling = false;
+            if (shouldPoll) {
+              setTimeout(() => { this.pollCommands(); }, 5000);
             }
-          });
-          this.polling = false;
-          if (shouldPoll) {
-            setTimeout(() => { this.pollCommands(); }, 5000);
           }
         });
       } else {
@@ -327,27 +335,25 @@ export default {
         scale,
         command,
         { args: this.arguments, timeout: this.timeout },
-      ).then((result) => {
-        if (result !== null) {
-          if (typeof this.executed[scale] === 'undefined') {
-            this.executed[scale] = {};
-          }
-          if (result.status !== 'error') {
-            this.$set(this.executed[scale], command, result.data.command);
-            this.pollCommands();
-          } else {
-            this.format = 'json';
-            this.$set(this.executed[scale], command, {
-              sha256_digest: this.sha256_digest,
-              scale,
-              // args,
-              command,
-              output: result.message,
-              format: 'json',
-              status: 'failed',
-            });
-            this.executed = Object.assign({}, this.executed);
-          }
+      ).then((resp) => {
+        if (typeof this.executed[scale] === 'undefined') {
+          this.executed[scale] = {};
+        }
+        if (resp.status === 'success') {
+          this.$set(this.executed[scale], command, resp.data.command);
+          this.pollCommands();
+        } else {
+          this.format = 'json';
+          this.$set(this.executed[scale], command, {
+            sha256_digest: this.sha256_digest,
+            scale,
+            // args,
+            command,
+            output: resp.message,
+            format: 'json',
+            status: 'failed',
+          });
+          this.executed = Object.assign({}, this.executed);
         }
       });
     },

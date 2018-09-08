@@ -6,10 +6,18 @@ import Vue from 'vue';
 export function getSample(SHA256Digest) {
   return new Promise((resolve) => {
     Vue.http.get(`${SNAKE_API}/store/${SHA256Digest}`).then((response) => {
-      resolve(response.data.data.sample);
+      resolve(response.data);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      resolve(null);
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
+      } else {
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
+      }
     });
   });
 }
@@ -17,26 +25,45 @@ export function getSample(SHA256Digest) {
 export function patchSample(sample, data) {
   return new Promise((resolve) => {
     Vue.http.patch(`${SNAKE_API}/${sample.file_type}/${sample.sha256_digest}`, data).then((response) => {
-      resolve(response.data.data[sample.file_type]);
+      resolve(response.data);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      resolve(null);
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
+      } else {
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
+      }
     });
   });
 }
 
 export function getSampleHex(sample) {
-  // NOTE: Only works for file so blank through for any other
   return new Promise((resolve) => {
     if (sample.file_type === 'file') {
       Vue.http.get(`${SNAKE_API}/file/${sample.sha256_digest}/hex`).then((response) => {
-        resolve(response.data.data.hex);
+        resolve(response.data);
       }).catch((e) => {
-        console.log(`An error occured - ${e}`);
-        resolve(null);
+        if (typeof e.body !== 'undefined') {
+          resolve(e.body);
+        } else {
+          console.error(e);
+          resolve({
+            data: null,
+            message: e,
+            status: 'error',
+          });
+        }
       });
     } else {
-      resolve(null);
+      resolve({
+        data: null,
+        message: 'not a file',
+        status: 'error',
+      });
     }
   });
 }

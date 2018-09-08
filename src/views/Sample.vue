@@ -89,18 +89,30 @@ export default {
 
   methods: {
     async loadSample() {
-      this.sample = await getSample(this.sha256_digest);
-      this.scales = await getScales(this.sample.file_type);
+      let resp = await getSample(this.sha256_digest);
+      if (resp.status === 'error') {
+        return;
+      }
+      this.sample = resp.data.sample;
+      resp = await getScales(this.sample.file_type);
+      if (resp.status === 'error') {
+        return;
+      }
+      this.scales = resp.data.scales;
       this.scales.forEach((scale) => {
         // Loop the components and load them
         scale.components.forEach((component) => {
           if (component === 'commands') {
-            getScaleCommands(scale.name).then((result) => {
-              this.$set(this.commands, scale.name, result);
+            getScaleCommands(scale.name).then((res) => {
+              if (res.status === 'success') {
+                this.$set(this.commands, scale.name, res.data.commands);
+              }
             });
           } else if (component === 'interface') {
-            getScaleInterface(scale.name).then((result) => {
-              this.$set(this.interfaces, scale.name, result);
+            getScaleInterface(scale.name).then((res) => {
+              if (res.status === 'success') {
+                this.$set(this.interfaces, scale.name, res.data.interface);
+              }
             });
           }
         });

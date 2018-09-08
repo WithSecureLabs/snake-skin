@@ -106,14 +106,18 @@ export default {
 
   methods: {
     getRecentFiles() {
-      getStore({ fileType: 'file', limit: 10, sort: 'timestamp' }).then((result) => {
-        this.files = result;
+      getStore({ fileType: 'file', limit: 10, sort: 'timestamp' }).then((resp) => {
+        if (resp.status === 'success') {
+          this.files = resp.data.samples;
+        }
       });
     },
 
     getRecentMemories() {
-      getStore({ fileType: 'memory', limit: 10, sort: 'timestamp' }).then((result) => {
-        this.memories = result;
+      getStore({ fileType: 'memory', limit: 10, sort: 'timestamp' }).then((resp) => {
+        if (resp.status === 'success') {
+          this.memories = resp.data.samples;
+        }
       });
     },
   },

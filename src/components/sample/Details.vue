@@ -151,7 +151,7 @@
 <script>
 import highlightjs from 'highlightjs';
 import { patchSample, getSampleHex } from '@/api/sample';
-import { pullScaleInterface } from '@/api/scale';
+import { postScaleInterface } from '@/api/scale';
 import Tags from '@/components/Tags.vue';
 
 const marked = require('marked-pax');
@@ -229,13 +229,11 @@ export default {
           if (typeof v.pullers !== 'undefined') {
             const found = v.pullers.some(p => p.command === 'info');
             if (found) {
-              pullScaleInterface(k, 'info', this.sample.sha256_digest, { format: 'markdown' }).then((result) => {
-                if (result !== null) {
-                  if (result.status !== 'error') {
-                    this.$set(this.interface_infos, k, result.data.interface);
-                  } else {
-                    this.$set(this.interface_infos, k, result.message);
-                  }
+              postScaleInterface(k, 'pull', 'info', this.sample.sha256_digest, { format: 'markdown' }).then((resp) => {
+                if (resp.status !== 'error') {
+                  this.$set(this.interface_infos, k, resp.data.interface);
+                } else {
+                  this.$set(this.interface_infos, k, resp.message);
                 }
               });
             }
@@ -248,8 +246,10 @@ export default {
       const data = {
         description: this.description,
       };
-      patchSample(this.sample, data).then((result) => {
-        this.sample.description = result.description;
+      patchSample(this.sample, data).then((resp) => {
+        if (resp.status === 'success') {
+          this.sample.description = resp.data.sample.description;
+        }
         this.editingDescription = false;
       });
     },
@@ -258,8 +258,10 @@ export default {
       const data = {
         name: this.name,
       };
-      patchSample(this.sample, data).then((result) => {
-        this.sample.name = result.name;
+      patchSample(this.sample, data).then((resp) => {
+        if (resp.status === 'success') {
+          this.sample.name = resp.data.sample.name;
+        }
         this.editingName = false;
       });
     },
@@ -268,8 +270,10 @@ export default {
       const data = {
         tags: this.tags,
       };
-      patchSample(this.sample, data).then((result) => {
-        this.sample.tags = result.tags;
+      patchSample(this.sample, data).then((resp) => {
+        if (resp.status === 'success') {
+          this.sample.tags = resp.data.sample.tags;
+        }
         this.editingTags = false;
       });
     },
@@ -281,8 +285,10 @@ export default {
     },
 
     sample() {
-      getSampleHex(this.sample).then((result) => {
-        this.hex = result;
+      getSampleHex(this.sample).then((resp) => {
+        if (resp.status === 'success') {
+          this.hex = resp.data.hex;
+        }
       });
       this.pullScaleInterfaceInfos();
     },

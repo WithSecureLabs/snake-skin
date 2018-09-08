@@ -78,8 +78,10 @@ export default {
         `filter[sha256_digest]=${text}&` +
         `filter[sha512_digest]=${text}&` +
         'operator=or';
-      getStore({ filter }).then((samples) => {
-        this.data = samples;
+      getStore({ filter }).then((resp) => {
+        if (resp.status === 'success') {
+          this.data = resp.data.samples;
+        }
         this.loading = false;
       });
     },

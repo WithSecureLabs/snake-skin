@@ -4,10 +4,18 @@ import Vue from 'vue';
 export function getScale(scale) {
   return new Promise((resolve) => {
     Vue.http.get(`${SNAKE_API}/scale/${scale}`).then((response) => {
-      resolve(response.data.data.scale);
+      resolve(response.data);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      resolve(null);
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
+      } else {
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
+      }
     });
   });
 }
@@ -15,10 +23,18 @@ export function getScale(scale) {
 export function getScaleCommands(scale) {
   return new Promise((resolve) => {
     Vue.http.get(`${SNAKE_API}/scale/${scale}/commands`).then((response) => {
-      resolve(response.data.data.commands);
+      resolve(response.data);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      resolve(null);
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
+      } else {
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
+      }
     });
   });
 }
@@ -26,10 +42,18 @@ export function getScaleCommands(scale) {
 export function getScaleInterface(scale) {
   return new Promise((resolve) => {
     Vue.http.get(`${SNAKE_API}/scale/${scale}/interface`).then((response) => {
-      resolve(response.data.data.interface);
+      resolve(response.data);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      resolve(null);
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
+      } else {
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
+      }
     });
   });
 }
@@ -37,67 +61,56 @@ export function getScaleInterface(scale) {
 export function getScaleUpload(scale) {
   return new Promise((resolve) => {
     Vue.http.get(`${SNAKE_API}/scale/${scale}/upload`).then((response) => {
-      resolve(response.data.data.upload);
-    }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      resolve(null);
-    });
-  });
-}
-
-export function getScales(fileType) {
-  let path = 'scales';
-  if (typeof fileType !== 'undefined') {
-    path = `${path}?file_type=${fileType}`;
-  }
-  return new Promise((resolve) => {
-    Vue.http.get(`${SNAKE_API}/${path}`).then((response) => {
-      resolve(response.data.data.scales);
-    }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      resolve(null);
-    });
-  });
-}
-
-export function pullScaleInterface(scale, pull, SHA256Digest, { args, format, timeout }) {
-  const data = {
-    sha256_digest: SHA256Digest,
-    type: 'pull',
-    format: 'json',
-    command: pull,
-  };
-  if (typeof format !== 'undefined') {
-    data.format = format;
-  }
-  if (args) {
-    data.args = args;
-  }
-  if (timeout) {
-    data.timeout = timeout;
-  }
-  return new Promise((resolve) => {
-    Vue.http.post(`${SNAKE_API}/scale/${scale}/interface`, data).then((response) => {
       resolve(response.data);
     }).catch((e) => {
       if (typeof e.body !== 'undefined') {
         resolve(e.body);
       } else {
-        console.log(`An error occured - ${e}`);
-        resolve(null);
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
       }
     });
   });
 }
 
-export function pushScaleInterface(scale, push, SHA256Digest, { args, format, timeout }) {
+export function getScales({ fileType } = {}) {
+  let path = 'scales';
+  if (fileType) {
+    path = `${path}?file_type=${fileType}`;
+  }
+  return new Promise((resolve) => {
+    Vue.http.get(`${SNAKE_API}/${path}`).then((response) => {
+      resolve(response.data);
+    }).catch((e) => {
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
+      } else {
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
+      }
+    });
+  });
+}
+
+export function postScaleInterface(
+  scale, type, command, SHA256Digest,
+  { args, format, timeout } = {},
+) {
   const data = {
-    sha256_digest: SHA256Digest,
-    type: 'push',
     format: 'json',
-    command: push,
+    sha256_digest: SHA256Digest,
+    command,
+    type,
   };
-  if (typeof format !== 'undefined') {
+  if (format) {
     data.format = format;
   }
   if (args) {
@@ -113,8 +126,12 @@ export function pushScaleInterface(scale, push, SHA256Digest, { args, format, ti
       if (typeof e.body !== 'undefined') {
         resolve(e.body);
       } else {
-        console.log(`An error occured - ${e}`);
-        resolve(null);
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
       }
     });
   });

@@ -68,6 +68,7 @@
 </template>
 
 <script>
+import { getItem } from '@/utils/helpers';
 import Tags from '@/components/Tags.vue';
 
 export default {
@@ -147,14 +148,7 @@ export default {
   },
 
   methods: {
-    getItem(obj, path) {
-      try {
-        // TODO: Handle arrays not sure the below can handle that
-        return path.split('.').reduce((value, el) => value[el], obj);
-      } catch (err) {
-        return {};
-      }
-    },
+    getItem,
 
     onPageChange(page) {
       if (page < 1) {
@@ -268,8 +262,11 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 #datatable {
+}
 
+.b-table {
+  position: relative;
 }
 </style>

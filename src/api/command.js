@@ -14,10 +14,18 @@ export function getCommand(SHA256Digest, scale, command, { format } = {}) {
   path = `${path}?${args.join('&')}`;
   return new Promise((resolve) => {
     Vue.http.get(`${SNAKE_API}/${path}`).then((response) => {
-      resolve(response.data.data.command);
+      resolve(response.data);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      resolve(null);
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
+      } else {
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
+      }
     });
   });
 }
@@ -45,24 +53,36 @@ export function postCommand(SHA256Digest, scale, command, { args, format, timeou
       if (typeof e.body !== 'undefined') {
         resolve(e.body);
       } else {
-        console.log(`An error occured - ${e}`);
-        resolve(null);
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
       }
     });
   });
 }
 
-export function getCommands(SHA256Digest) {
+export function getCommands({ SHA256Digest } = {}) {
   let path = 'commands';
-  if (typeof SHA256Digest !== 'undefined') {
+  if (SHA256Digest) {
     path = `${path}?sha256_digest=${SHA256Digest}`;
   }
   return new Promise((resolve) => {
     Vue.http.get(`${SNAKE_API}/${path}`).then((response) => {
-      resolve(response.data.data.commands);
+      resolve(response.data);
     }).catch((e) => {
-      console.log(`An error occured - ${e}`);
-      resolve(null);
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
+      } else {
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
+      }
     });
   });
 }
@@ -75,8 +95,12 @@ export function postCommands(data) {
       if (typeof e.body !== 'undefined') {
         resolve(e.body);
       } else {
-        console.log(`An error occured - ${e}`);
-        resolve(null);
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
       }
     });
   });

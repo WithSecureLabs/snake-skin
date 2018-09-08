@@ -20,23 +20,23 @@
           <ul class="menu-list">
             <li>
               <a v-for="cmd in v.pullers" :key="k + cmd.command"
-                 :class="{'is-active': isActive(k, 'puller', cmd.command)}"
-                 @click="selectCommand(k, 'puller', cmd.command)">
+                 :class="{'is-active': isActive(k, 'pull', cmd.command)}"
+                 @click="selectCommand(k, 'pull', cmd.command)">
                 <div class="level">
                   <div class="level-left">
                     {{ cmd.command }}
                   </div>
                   <div class="level-right">
-                    <i v-if="isPending(k, 'puller', cmd.command)"
+                    <i v-if="isPending(k, 'pull', cmd.command)"
                        class="mdi mdi-dots-horizontal mdi-18px"
                        aria-hidden="true"></i>
-                    <i v-if="isRunning(k, 'puller', cmd.command)"
+                    <i v-if="isRunning(k, 'pull', cmd.command)"
                        class="mdi mdi-loading mdi-18px spin"
                        aria-hidden="true"></i>
-                    <i v-if="isSuccess(k, 'puller', cmd.command)"
+                    <i v-if="isSuccess(k, 'pull', cmd.command)"
                        class="mdi mdi-check mdi-18px"
                        aria-hidden="true"></i>
-                    <i v-if="isFailed(k, 'puller', cmd.command)"
+                    <i v-if="isFailed(k, 'pull', cmd.command)"
                        class="mdi mdi-close mdi-18px"
                        aria-hidden="true"></i>
                     <div>
@@ -46,7 +46,7 @@
                           classes: ['tooltip'],
                          }"
                          class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
-                      <button :disabled="isPending(k, 'puller', cmd.command) || isRunning(k, 'puller', cmd.command)"
+                      <button :disabled="isPending(k, 'pull', cmd.command) || isRunning(k, 'pull', cmd.command)"
                               @click="runCommand(k, cmd.command)"
                               class="icon-button"
                       >
@@ -60,27 +60,27 @@
           </ul>
         </template>
         <template v-if="v.pushers.length > 0">
-          <h2 class="menu-label">Pullers</h2>
+          <h2 class="menu-label">Pushers</h2>
           <ul class="menu-list">
             <li>
               <a v-for="cmd in v.pushers" :key="k + cmd.command"
-                 :class="{'is-active': isActive(k, 'pusher', cmd.command)}"
-                 @click="selectCommand(k, 'pusher', cmd.command)">
+                 :class="{'is-active': isActive(k, 'push', cmd.command)}"
+                 @click="selectCommand(k, 'push', cmd.command)">
                 <div class="level">
                   <div class="level-left">
                     {{ cmd.command }}
                   </div>
                   <div class="level-right">
-                    <i v-if="isPending(k, 'pusher', cmd.command)"
+                    <i v-if="isPending(k, 'push', cmd.command)"
                        class="mdi mdi-dots-horizontal mdi-18px"
                        aria-hidden="true"></i>
-                    <i v-if="isRunning(k, 'pusher', cmd.command)"
+                    <i v-if="isRunning(k, 'push', cmd.command)"
                        class="mdi mdi-loading mdi-18px spin"
                        aria-hidden="true"></i>
-                    <i v-if="isSuccess(k, 'pusher', cmd.command)"
+                    <i v-if="isSuccess(k, 'push', cmd.command)"
                        class="mdi mdi-check mdi-18px"
                        aria-hidden="true"></i>
-                    <i v-if="isFailed(k, 'pusher', cmd.command)"
+                    <i v-if="isFailed(k, 'push', cmd.command)"
                        class="mdi mdi-close mdi-18px"
                        aria-hidden="true"></i>
                     <div>
@@ -90,7 +90,7 @@
                           classes: ['tooltip'],
                          }"
                          class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
-                      <button :disabled="isPending(k, 'pusher', cmd.command) || isRunning(k, 'pusher', cmd.command)"
+                      <button :disabled="isPending(k, 'push', cmd.command) || isRunning(k, 'push', cmd.command)"
                               @click="runCommand(k, cmd.command)"
                               class="icon-button"
                       >
@@ -172,7 +172,7 @@
 
 <script>
 import highlightjs from 'highlightjs';
-import { pullScaleInterface, pushScaleInterface } from '@/api/scale';
+import { postScaleInterface } from '@/api/scale';
 import { FORMATS } from '@/settings';
 
 const marked = require('marked-pax');
@@ -269,100 +269,50 @@ export default {
     },
 
     runCommand(scale, command) {
-      if (this.selectedType === 'puller') {
-        if (typeof this.executed[scale] === 'undefined') {
-          this.executed[scale] = {};
-        }
-        //
-        this.$set(this.executed[scale], command, {
-          sha256_digest: this.sha256_digest,
-          scale,
-          // args,
-          command,
-          output: null,
-          format: this.format,
-          status: 'running',
-        });
-        pullScaleInterface(
-          scale,
-          command,
-          this.sha256_digest,
-          { args: this.arguments, format: this.format, timeout: this.timeout },
-        ).then((result) => {
-          if (result !== null) {
-            if (result.status !== 'error') {
-              this.$set(this.executed[scale], command, {
-                sha256_digest: this.sha256_digest,
-                scale,
-                // args,
-                command,
-                output: result.data.interface,
-                format: this.format,
-                status: 'success',
-              });
-              this.executed = Object.assign({}, this.executed);
-            } else {
-              this.format = 'json';
-              this.$set(this.executed[scale], command, {
-                sha256_digest: this.sha256_digest,
-                scale,
-                // args,
-                command,
-                output: result.message,
-                format: 'json',
-                status: 'failed',
-              });
-              this.executed = Object.assign({}, this.executed);
-            }
-          }
-        });
-      } else if (this.selectedType === 'pusher') {
-        if (typeof this.executed[scale] === 'undefined') {
-          this.executed[scale] = {};
-        }
-        this.$set(this.executed[scale], command, {
-          sha256_digest: this.sha256_digest,
-          scale,
-          // args,
-          command,
-          output: null,
-          format: this.format,
-          status: 'running',
-        });
-        pushScaleInterface(
-          scale,
-          command,
-          this.sha256_digest,
-          { args: this.arguments, format: this.format, timeout: this.timeout },
-        ).then((result) => {
-          if (result !== null) {
-            if (result.status !== 'error') {
-              this.$set(this.executed[scale], command, {
-                sha256_digest: this.sha256_digest,
-                scale,
-                // args,
-                command,
-                output: result.data.interface,
-                format: this.format,
-                status: 'success',
-              });
-              this.executed = Object.assign({}, this.executed);
-            } else {
-              this.format = 'json';
-              this.$set(this.executed[scale], command, {
-                sha256_digest: this.sha256_digest,
-                scale,
-                // args,
-                command,
-                output: result.message,
-                format: 'json',
-                status: 'failed',
-              });
-              this.executed = Object.assign({}, this.executed);
-            }
-          }
-        });
+      if (typeof this.executed[scale] === 'undefined') {
+        this.executed[scale] = {};
       }
+      this.$set(this.executed[scale], command, {
+        sha256_digest: this.sha256_digest,
+        scale,
+        // args,
+        command,
+        output: null,
+        format: this.format,
+        status: 'running',
+      });
+      postScaleInterface(
+        scale,
+        this.selectedType,
+        command,
+        this.sha256_digest,
+        { args: this.arguments, format: this.format, timeout: this.timeout },
+      ).then((resp) => {
+        if (resp.status === 'success') {
+          this.$set(this.executed[scale], command, {
+            sha256_digest: this.sha256_digest,
+            scale,
+            // args,
+            command,
+            output: resp.data.interface,
+            format: this.format,
+            status: 'success',
+          });
+          this.executed = Object.assign({}, this.executed);
+        } else {
+          this.format = 'json';
+          this.$set(this.executed[scale], command, {
+            sha256_digest: this.sha256_digest,
+            scale,
+            // args,
+            command,
+            output: resp.message,
+            format: 'json',
+            status: 'failed',
+          });
+          this.executed = Object.assign({}, this.executed);
+        }
+      });
     },
 
     selectCommand(scale, type, name) {
@@ -375,7 +325,7 @@ export default {
       // Only activate if not in executed
       if (typeof this.executed[scale] === 'undefined' || typeof this.executed[scale][name] === 'undefined') {
         // NOTE: Don't run pushers by default
-        if (type === 'pusher') {
+        if (type === 'push') {
           this.showDetails = true;
           this.selectedScale = scale;
           this.selectedType = type;
@@ -410,9 +360,9 @@ export default {
       // Handle formats
       let supportedFormats = [];
       let commands = [];
-      if (type === 'puller') {
+      if (type === 'pull') {
         commands = this.scales[scale].pullers;
-      } else if (type === 'pusher') {
+      } else if (type === 'push') {
         commands = this.scales[scale].pushers;
       }
       commands.some((command) => {
@@ -445,9 +395,9 @@ export default {
       let args = {};
       if (typeof this.scales[scale] !== 'undefined') {
         let commands = [];
-        if (type === 'puller') {
+        if (type === 'pull') {
           commands = this.scales[scale].pullers;
-        } else if (type === 'pusher') {
+        } else if (type === 'push') {
           commands = this.scales[scale].pushers;
         }
         commands.some((command) => {

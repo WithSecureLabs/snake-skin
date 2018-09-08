@@ -5,31 +5,39 @@ export function getStore({
 } = {}) {
   let path = 'store';
   const args = [];
-  if (typeof fileType !== 'undefined') {
+  if (fileType) {
     args.push(`file_type=${fileType}`);
   }
-  if (typeof filter !== 'undefined') {
+  if (filter) {
     // NOTE: Preformatted for now, not built here
     args.push(filter);
   }
-  if (typeof limit !== 'undefined') {
+  if (limit) {
     args.push(`limit=${limit}`);
   }
-  if (typeof order !== 'undefined') {
+  if (order) {
     args.push(`order=${order}`);
   }
-  if (typeof sort !== 'undefined') {
+  if (sort) {
     args.push(`sort=${sort}`);
   }
-  if (args.length !== 0) {
+  if (args.length > 0) {
     path = `${path}?${args.join('&')}`;
   }
   return new Promise((resolve) => {
     fetch(`${SNAKE_API}/${path}`).then(res => res.json()).then((data) => {
-      resolve(data.data.samples);
+      resolve(data);
     }).catch((e) => {
-      console.error(e);
-      resolve(null);
+      if (typeof e.body !== 'undefined') {
+        resolve(e.body);
+      } else {
+        console.error(e);
+        resolve({
+          data: null,
+          message: e,
+          status: 'error',
+        });
+      }
     });
   });
 }

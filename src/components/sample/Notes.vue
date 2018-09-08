@@ -44,7 +44,7 @@ renderer.code = (code, language) => {
   return `<pre><code class="hljs ${language}">${highlighted}</code></pre>`;
 };
 
-renderer.color = function (color, text) {
+renderer.color = function rend(color, text) {
   if (color === 'green') {
     // SASS: cc-greenblue
     // eslint-disable-next-line no-param-reassign
@@ -86,8 +86,10 @@ export default {
   }),
 
   mounted() {
-    getNote(this.sha256_digest).then((result) => {
-      this.note = result;
+    getNote(this.sha256_digest).then((resp) => {
+      if (resp.status === 'success') {
+        this.note = resp.data.note;
+      }
     });
   },
 
@@ -107,13 +109,17 @@ export default {
         body: this.noteBody,
       };
       if (this.note) {
-        patchNote(this.sha256_digest, data).then((result) => {
-          this.note = result;
+        patchNote(this.sha256_digest, data).then((resp) => {
+          if (resp.status === 'success') {
+            this.note = resp.data.note;
+          }
           this.editingNote = false;
         });
       } else {
-        postNote(this.sha256_digest, data).then((result) => {
-          this.note = result;
+        postNote(this.sha256_digest, data).then((resp) => {
+          if (resp.status === 'success') {
+            this.note = resp.data.note;
+          }
           this.editingNote = false;
         });
       }
@@ -122,8 +128,10 @@ export default {
 
   watch: {
     sha256_digest() {
-      getNote(this.sha256_digest).then((result) => {
-        this.note = result;
+      getNote(this.sha256_digest).then((resp) => {
+        if (resp.status === 'success') {
+          this.note = resp.data.note;
+        }
       });
     },
   },

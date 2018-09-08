@@ -30,7 +30,7 @@
                 </div>
                 <div v-for="(v, k) in uploads" class="field" :key="k">
                   <b-radio v-model="submission_type" :native-value="k">
-                    {{ k }}
+                    {{ toCaps(k) }}
                   </b-radio>
                 </div>
               </section>
@@ -348,6 +348,7 @@
 <script>
 import { postCommands } from '@/api/command';
 import { getScales, getScaleCommands, getScaleInterface, getScaleUpload, pushScaleInterface } from '@/api/scale';
+import { toCaps } from '@/utils/helpers';
 import { SNAKE_API } from '@/settings';
 import Tags from '@/components/Tags.vue';
 
@@ -392,6 +393,9 @@ export default {
   },
 
   methods: {
+    // Re-expose
+    toCaps,
+
     addCommand() {
       if (this.commandScale && this.commandName) {
         const cmd = `${this.commandScale}:${this.commandName}`;
@@ -426,28 +430,31 @@ export default {
       this.commands = {};
       this.interfaces = {};
       this.uploads = {};
-      const scales = await getScales(this.sample_type);
-      scales.forEach((scale) => {
-        // Loop the components and load them
-        scale.components.forEach((component) => {
-          if (component === 'commands') {
-            getScaleCommands(scale.name).then((result) => {
-              this.$set(this.commands, scale.name, result);
-            });
-          } else if (component === 'interface') {
-            getScaleInterface(scale.name).then((result) => {
-              // Only if they have pushers
-              if (result.pushers.length > 0) {
-                this.$set(this.interfaces, scale.name, result);
-              }
-            });
-          } else if (component === 'upload') {
-            getScaleUpload(scale.name).then((result) => {
-              this.$set(this.uploads, scale.name, result);
-            });
-          }
+      const resp = await getScales(this.sample_type);
+      if (resp.status === 'success') {
+        const { scales } = resp.data;
+        scales.forEach((scale) => {
+          // Loop the components and load them
+          scale.components.forEach((component) => {
+            if (component === 'commands') {
+              getScaleCommands(scale.name).then((result) => {
+                this.$set(this.commands, scale.name, result);
+              });
+            } else if (component === 'interface') {
+              getScaleInterface(scale.name).then((result) => {
+                // Only if they have pushers
+                if (result.pushers.length > 0) {
+                  this.$set(this.interfaces, scale.name, result);
+                }
+              });
+            } else if (component === 'upload') {
+              getScaleUpload(scale.name).then((result) => {
+                this.$set(this.uploads, scale.name, result);
+              });
+            }
+          });
         });
-      });
+      }
     },
 
     close() {
