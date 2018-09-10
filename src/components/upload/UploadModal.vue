@@ -347,7 +347,7 @@
 
 <script>
 import { postCommands } from '@/api/command';
-import { getScales, getScaleCommands, getScaleInterface, getScaleUpload, pushScaleInterface } from '@/api/scale';
+import { getScales, getScaleCommands, getScaleInterface, getScaleUpload, postScaleInterface } from '@/api/scale';
 import { toCaps } from '@/utils/helpers';
 import { SNAKE_API } from '@/settings';
 import Tags from '@/components/Tags.vue';
@@ -438,18 +438,24 @@ export default {
           scale.components.forEach((component) => {
             if (component === 'commands') {
               getScaleCommands(scale.name).then((result) => {
-                this.$set(this.commands, scale.name, result);
+                if (result.status === 'success') {
+                  this.$set(this.commands, scale.name, result.data.commands);
+                }
               });
             } else if (component === 'interface') {
               getScaleInterface(scale.name).then((result) => {
+                if (result.status === 'success') {
                 // Only if they have pushers
-                if (result.pushers.length > 0) {
-                  this.$set(this.interfaces, scale.name, result);
+                  if (result.data.interface.pushers.length > 0) {
+                    this.$set(this.interfaces, scale.name, result.data.interface);
+                  }
                 }
               });
             } else if (component === 'upload') {
               getScaleUpload(scale.name).then((result) => {
-                this.$set(this.uploads, scale.name, result);
+                if (result.status === 'success') {
+                  this.$set(this.uploads, scale.name, result.data.upload);
+                }
               });
             }
           });
@@ -513,7 +519,7 @@ export default {
         const form = new FormData();
         form.append('file', this.files[0]);
         form.append('name', this.files[0].name);
-        form.append('tags', this.tags);
+        form.append('tags', this.tags.join(','));
         form.append('description', this.description);
         form.append('file_type', this.sample_type);
         if (this.extract) {
@@ -528,10 +534,10 @@ export default {
       } else {
         // Scale upload based
         const data = {
-          args: this.arguments,
+          args: this.args,
           description: this.description,
           file_type: this.sample_type,
-          tags: this.tags,
+          tags: this.tags.join(','),
         };
         if (!this.autoname) {
           data.name = this.name;
@@ -549,7 +555,7 @@ export default {
       // Don't use the API as we handle this in a special way
       fetch(`${SNAKE_API}/${path}`, {
         method: 'POST',
-        body,
+        body: JSON.stringify(body),
       }).then((res) => {
         // 409 means already uploaded, progress to page 5
         if (res.status === 409) {
@@ -572,16 +578,24 @@ export default {
             });
           });
           if (cmds.length > 0) {
-            this.uploaded.commands = await postCommands(cmds);
+            const resp = await postCommands(cmds);
+            if (resp.status === 'success') {
+              this.uploaded.commands = resp.data.commands;
+            }
           }
           if (this.pshs.length > 0) {
             this.uploaded.pushers = [];
           }
           this.pshs.forEach(async (psh) => {
             const [scale, command] = psh.split(':');
-            const push = await pushScaleInterface(scale, command, sample.sha256_digest);
-            this.uploaded.pushers.push(push);
+            const resp = await postScaleInterface(scale, 'push', command, sample.sha256_digest);
+            this.uploaded.pushers.push({
+              scale,
+              command: resp.data.command,
+              status: resp.status,
+            });
           });
+          this.uploaded = Object.assign({}, this.uploaded);
         }
         this.page = 4;
       }).catch((e) => {

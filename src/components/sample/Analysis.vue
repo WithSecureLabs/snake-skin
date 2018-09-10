@@ -134,6 +134,7 @@
 import highlightjs from 'highlightjs';
 import { postCommand, getCommand, getCommands } from '@/api/command';
 import { FORMATS } from '@/settings';
+import { sorted } from '@/utils/helpers';
 
 const marked = require('marked-pax');
 
@@ -214,6 +215,8 @@ export default {
   },
 
   methods: {
+    sorted,
+
     changeFormat(format) {
       this.format = format;
       getCommand(
@@ -390,14 +393,6 @@ export default {
       });
       [this.format] = this.formats;
       this.changeFormat(this.format);
-    },
-
-    sorted(unordered) {
-      const ordered = {};
-      Object.keys(unordered).sort().forEach((key) => {
-        ordered[key] = unordered[key];
-      });
-      return ordered;
     },
 
     // Helper functions

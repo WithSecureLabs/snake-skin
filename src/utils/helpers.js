@@ -15,3 +15,11 @@ export function toCaps(string) {
   });
   return words.join(' ');
 }
+
+export function sorted(unordered) {
+  const ordered = {};
+  Object.keys(unordered).sort().forEach((key) => {
+    ordered[key] = unordered[key];
+  });
+  return ordered;
+}

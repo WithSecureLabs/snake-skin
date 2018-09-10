@@ -18,7 +18,7 @@
                                   v-model="name"
                                   placeholder="Name"
                                   style="min-height: 30px"
-                        ></input>
+                        >
                         <template v-else>{{ sample.name }}</template>
                       </div>
                     </div>
@@ -137,9 +137,9 @@
           <pre v-else-if="sample && sample.description">{{ sample.description }}</pre>
           <pre v-else>No Description</pre>
         </div>
-        <template v-for="(v, k) in interface_infos">
+        <template v-for="(v, k) in sorted(interface_infos)">
           <div :key="k" class="box">
-            <h1 class="title">{{ k }}</h1>
+            <h1 class="title">{{ toCaps(k) }}</h1>
             <div class="markdown" v-html="markdown(v)"></div>
           </div>
         </template>
@@ -153,6 +153,7 @@ import highlightjs from 'highlightjs';
 import { patchSample, getSampleHex } from '@/api/sample';
 import { postScaleInterface } from '@/api/scale';
 import Tags from '@/components/Tags.vue';
+import { sorted, toCaps } from '@/utils/helpers';
 
 const marked = require('marked-pax');
 
@@ -216,6 +217,9 @@ export default {
   }),
 
   methods: {
+    sorted,
+    toCaps,
+
     markdown(body) {
       if (typeof body !== 'undefined') {
         return marked(body);
@@ -260,7 +264,8 @@ export default {
       };
       patchSample(this.sample, data).then((resp) => {
         if (resp.status === 'success') {
-          this.sample.name = resp.data.sample.name;
+          const fileType = this.sample.file_type;
+          this.sample.name = resp.data[fileType].name;
         }
         this.editingName = false;
       });
@@ -272,7 +277,8 @@ export default {
       };
       patchSample(this.sample, data).then((resp) => {
         if (resp.status === 'success') {
-          this.sample.tags = resp.data.sample.tags;
+          const fileType = this.sample.file_type;
+          this.sample.tags = resp.data[fileType].tags;
         }
         this.editingTags = false;
       });
