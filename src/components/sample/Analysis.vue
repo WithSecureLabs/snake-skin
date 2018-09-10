@@ -245,7 +245,7 @@ export default {
     },
 
     loadExecuted() {
-      getCommands(this.sha256_digest).then((resp) => {
+      getCommands({ SHA256Digest: this.sha256_digest }).then((resp) => {
         if (resp.status === 'success') {
           const { commands } = resp.data;
           commands.forEach((command) => {
@@ -297,7 +297,7 @@ export default {
         // snake-core to handle a 'GET' in the POST even though snake-core accepts
         // GETs with bodies clients don't like to allow this
         // NOTE: Until we have GET in POST this can't be used, we have to just request everything :S
-        getCommands(this.sha256_digest).then((resp) => {
+        getCommands({ SHA256Diges: this.sha256_digest }).then((resp) => {
           if (resp.status === 'success') {
             const { commands } = resp.data;
             let shouldPoll = false;
