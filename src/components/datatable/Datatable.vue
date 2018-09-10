@@ -203,9 +203,6 @@ export default {
 
     setBData(value) {
       this.bData = value;
-      if (this.total) {
-        this.bTotal = this.total;
-      }
     },
 
     setPageSize(value) {
@@ -257,6 +254,10 @@ export default {
     },
     selectedRow(value) {
       this.selected = value;
+    },
+
+    total(value) {
+      this.bTotal = value;
     },
   },
 };

@@ -23,6 +23,7 @@ export default {
   },
   data: () => ({
     loading: false,
+    total: 0,
   }),
   methods: {
     columns(callback) {
