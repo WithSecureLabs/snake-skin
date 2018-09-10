@@ -28,7 +28,7 @@
                     Sample
                   </b-radio>
                 </div>
-                <div v-for="(v, k) in uploads" class="field" :key="k">
+                <div v-for="(v, k) in sorted(uploads)" class="field" :key="k">
                   <b-radio v-model="submission_type" :native-value="k">
                     {{ toCaps(k) }}
                   </b-radio>
@@ -348,7 +348,7 @@
 <script>
 import { postCommands } from '@/api/command';
 import { getScales, getScaleCommands, getScaleInterface, getScaleUpload, postScaleInterface } from '@/api/scale';
-import { toCaps } from '@/utils/helpers';
+import { sorted, toCaps } from '@/utils/helpers';
 import { SNAKE_API } from '@/settings';
 import Tags from '@/components/Tags.vue';
 
@@ -394,6 +394,7 @@ export default {
 
   methods: {
     // Re-expose
+    sorted,
     toCaps,
 
     addCommand() {
@@ -560,6 +561,8 @@ export default {
         // 409 means already uploaded, progress to page 5
         if (res.status === 409) {
           this.alreadyUploaded = true;
+        } else if (res.status < 200 || res.status >= 300) {
+          return Promise.reject(res);
         }
         return res.json();
       }).then(async (data) => {
@@ -599,10 +602,12 @@ export default {
         }
         this.page = 4;
       }).catch((e) => {
-        console.error(e);
-        this.uploaded.error = e;
-        this.failed = true;
-        this.page = 4;
+        e.json().then((j) => {
+          console.error(j);
+          this.uploaded.error = j;
+          this.failed = true;
+          this.page = 4;
+        });
       });
     },
   },
