@@ -550,13 +550,13 @@ export default {
           }
         }
 
-        body = data;
+        body = JSON.stringify(data);
         path = `scale/${this.submission_type}/upload`;
       }
       // Don't use the API as we handle this in a special way
       fetch(`${SNAKE_API}/${path}`, {
         method: 'POST',
-        body: JSON.stringify(body),
+        body,
       }).then((res) => {
         // 409 means already uploaded, progress to page 5
         if (res.status === 409) {
