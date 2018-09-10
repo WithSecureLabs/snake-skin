@@ -66,7 +66,7 @@
             </template>
             <template v-else>
               <b-field v-for="(v, k) in uploads[submission_type].args"
-                       :label="k"
+                       :label="toCaps(k)"
                        :key="k"
                        :type="isDanger(k)">
                 <b-input v-model="$data.args[k]" :placeholder="k"></b-input>
@@ -135,7 +135,7 @@
               <div class="level">
                 <div class="level-left">
                   <b-select placeholder="Select a scale" v-model="commandScale">
-                    <option v-for="(v, k) in commands"
+                    <option v-for="(v, k) in sorted(commands)"
                             :value="k"
                             :key="k">
                             {{ k }}
@@ -173,7 +173,7 @@
               <div class="level">
                 <div class="level-left">
                   <b-select placeholder="Select a scale" v-model="pusherScale">
-                    <option v-for="(v, k) in interfaces"
+                    <option v-for="(v, k) in sorted(interfaces)"
                             :value="k"
                             :key="k">
                             {{ k }}
