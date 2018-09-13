@@ -94,7 +94,7 @@ export default {
         return;
       }
       this.sample = resp.data.sample;
-      resp = await getScales(this.sample.file_type);
+      resp = await getScales({ fileType: this.sample.file_type });
       if (resp.status === 'error') {
         return;
       }

@@ -431,7 +431,7 @@ export default {
       this.commands = {};
       this.interfaces = {};
       this.uploads = {};
-      const resp = await getScales(this.sample_type);
+      const resp = await getScales({ fileType: this.sample_type });
       if (resp.status === 'success') {
         const { scales } = resp.data;
         scales.forEach((scale) => {

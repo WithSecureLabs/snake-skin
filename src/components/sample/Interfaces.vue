@@ -254,7 +254,7 @@ export default {
   },
 
   methods: {
-    sorted, 
+    sorted,
 
     changeFormat(format) {
       this.format = format;
