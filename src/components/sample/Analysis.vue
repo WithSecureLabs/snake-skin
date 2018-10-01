@@ -113,7 +113,10 @@
         </div>
         <div v-if="showDetails">
           <b-field label="Timeout">
-            <b-input v-model="timeout" placeholder="Enter Timeout... (default: 600)"></b-input>
+            <b-input type="number"
+                     v-model="timeout"
+                     placeholder="Enter Timeout... (default: 600)"
+            ></b-input>
           </b-field>
           <template v-for="(v, k) in commandArguments(selectedScale, selectedCommand)">
             <b-field :label="toCaps(k, {'delimiter': '_'})" :key="k">
@@ -129,9 +132,14 @@
               >
                 {{ toCaps(k) }}
               </b-checkbox>
+              <b-input v-else-if="v.type === 'integer'"
+                       type="number"
+                       v-model="$data.arguments[k]"
+                       :placeholder="'Enter ' + toCaps(k, {'delimiter': '_'}) + '... (default: ' + getDefaultArgument(v) + ')'"
+              ></b-input>
               <b-input v-else
                        v-model="$data.arguments[k]"
-                       :placeholder="'Enter ' + toCaps(k, {'delimiter': '_'}) + '...'"
+                       :placeholder="'Enter ' + toCaps(k, {'delimiter': '_'}) + '... (default: ' + getDefaultArgument(v) + ')'"
               ></b-input>
             </b-field>
           </template>
