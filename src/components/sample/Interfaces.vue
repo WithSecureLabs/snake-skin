@@ -1,110 +1,122 @@
 <template>
   <div id="interfaces" class="interfaces">
     <div class="sidebar">
-      <ul class="menu-list">
-        <b-collapse :open="true" class="menu-section" v-for="(v, k) in sorted(scales)" :key=k>
-        <a slot="trigger" class="menu-label" slot-scope="props">
-          <div class="level">
-          <div class="level-left">
-          <span class="scale">{{ k }}</span>
-          </div>
-          <div class="level-right">
-          <i class="mdi mdi-18px"
-             :class="props.open ? 'mdi-menu-down' : 'mdi-menu-right'"
-             aria-hidden="true"></i>
-          </div>
-          </div>
-        </a>
-        <template v-if="v.pullers.length > 0">
-          <h2 class="menu-label">Pullers</h2>
-          <ul class="menu-list">
-            <li>
-              <a v-for="cmd in v.pullers" :key="k + cmd.command"
-                 :class="{'is-active': isActive(k, 'pull', cmd.command)}"
-                 @click="selectCommand(k, 'pull', cmd.command)">
-                <div class="level">
-                  <div class="level-left">
-                    {{ cmd.command }}
-                  </div>
-                  <div class="level-right">
-                    <i v-if="isPending(k, 'pull', cmd.command)"
-                       class="mdi mdi-dots-horizontal mdi-18px"
-                       aria-hidden="true"></i>
-                    <i v-if="isRunning(k, 'pull', cmd.command)"
-                       class="mdi mdi-loading mdi-18px spin"
-                       aria-hidden="true"></i>
-                    <i v-if="isSuccess(k, 'pull', cmd.command)"
-                       class="mdi mdi-check mdi-18px"
-                       aria-hidden="true"></i>
-                    <i v-if="isFailed(k, 'pull', cmd.command)"
-                       class="mdi mdi-close mdi-18px"
-                       aria-hidden="true"></i>
-                    <div>
-                      <i v-tooltip="{
-                          content: cmd.info,
-                          placement: 'bottom',
-                          classes: ['tooltip'],
-                         }"
-                         class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
-                      <button :disabled="isPending(k, 'pull', cmd.command) || isRunning(k, 'pull', cmd.command)"
-                              @click="runCommand(k, 'pull',cmd.command)"
-                              class="icon-button"
-                      >
-                        <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
-                      </button>
+      <input id="input"
+            class="input"
+            type="text"
+            v-model="searchText"
+            placeholder="Scale..."
+            style="width:190px"
+      >
+      <div>
+        <ul class="menu-list">
+          <b-collapse :open="true" class="menu-section" v-for="(v, k) in sorted(scales)" :key=k>
+          <a slot="trigger" class="menu-label" slot-scope="props">
+            <div class="level">
+            <div class="level-left">
+            <span class="scale">{{ k }}</span>
+            </div>
+            <div class="level-right">
+            <i class="mdi mdi-18px"
+               :class="props.open ? 'mdi-menu-down' : 'mdi-menu-right'"
+               aria-hidden="true"></i>
+            </div>
+            </div>
+          </a>
+          <div v-if="v.pullers.length > 0">
+            <h2 class="menu-label submenu-label">Pullers</h2>
+            <ul class="menu-list">
+              <li>
+                <a v-for="cmd in v.pullers" :key="k + cmd.command"
+                   :class="{'is-active': isActive(k, 'pull', cmd.command)}"
+                   @click="selectCommand(k, 'pull', cmd.command)">
+                  <div class="level">
+                    <div class="level-left">
+                      - {{ cmd.command }}
+                    </div>
+                    <div class="level-right">
+                      <i v-if="isPending(k, 'pull', cmd.command)"
+                         class="mdi mdi-dots-horizontal mdi-18px"
+                         aria-hidden="true"></i>
+                      <i v-if="isRunning(k, 'pull', cmd.command)"
+                         class="mdi mdi-loading mdi-18px spin"
+                         aria-hidden="true"></i>
+                      <i v-if="isSuccess(k, 'pull', cmd.command)"
+                         class="mdi mdi-check mdi-18px"
+                         aria-hidden="true"></i>
+                      <i v-if="isFailed(k, 'pull', cmd.command)"
+                         class="mdi mdi-close mdi-18px"
+                         aria-hidden="true"></i>
+                      <div>
+                        <i v-tooltip="{
+                            content: cmd.info,
+                            placement: 'bottom',
+                            classes: ['tooltip'],
+                           }"
+                           class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
+                        <button :disabled="isPending(k, 'pull', cmd.command) || isRunning(k, 'pull', cmd.command)"
+                                @click="runCommand(k, 'pull',cmd.command)"
+                                class="icon-button"
+                        >
+                          <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </a>
-            </li>
-          </ul>
-        </template>
-        <template v-if="v.pushers.length > 0">
-          <h2 class="menu-label">Pushers</h2>
-          <ul class="menu-list">
-            <li>
-              <a v-for="cmd in v.pushers" :key="k + cmd.command"
-                 :class="{'is-active': isActive(k, 'push', cmd.command)}"
-                 @click="selectCommand(k, 'push', cmd.command)">
-                <div class="level">
-                  <div class="level-left">
-                    {{ cmd.command }}
-                  </div>
-                  <div class="level-right">
-                    <i v-if="isPending(k, 'push', cmd.command)"
-                       class="mdi mdi-dots-horizontal mdi-18px"
-                       aria-hidden="true"></i>
-                    <i v-if="isRunning(k, 'push', cmd.command)"
-                       class="mdi mdi-loading mdi-18px spin"
-                       aria-hidden="true"></i>
-                    <i v-if="isSuccess(k, 'push', cmd.command)"
-                       class="mdi mdi-check mdi-18px"
-                       aria-hidden="true"></i>
-                    <i v-if="isFailed(k, 'push', cmd.command)"
-                       class="mdi mdi-close mdi-18px"
-                       aria-hidden="true"></i>
-                    <div>
-                      <i v-tooltip="{
-                          content: cmd.info,
-                          placement: 'bottom',
-                          classes: ['tooltip'],
-                         }"
-                         class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
-                      <button :disabled="isPending(k, 'push', cmd.command) || isRunning(k, 'push', cmd.command)"
-                              @click="runCommand(k, 'push', cmd.command)"
-                              class="icon-button"
-                      >
-                        <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
-                      </button>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div v-if="v.pushers.length > 0">
+            <h2 class="menu-label submenu-label">Pushers</h2>
+            <ul class="menu-list">
+              <li>
+                <a v-for="cmd in v.pushers" :key="k + cmd.command"
+                   :class="{'is-active': isActive(k, 'push', cmd.command)}"
+                   @click="selectCommand(k, 'push', cmd.command)">
+                  <div class="level">
+                    <div class="level-left">
+                      - {{ cmd.command }}
+                    </div>
+                    <div class="level-right">
+                      <i v-if="isPending(k, 'push', cmd.command)"
+                         class="mdi mdi-dots-horizontal mdi-18px"
+                         aria-hidden="true"></i>
+                      <i v-if="isRunning(k, 'push', cmd.command)"
+                         class="mdi mdi-loading mdi-18px spin"
+                         aria-hidden="true"></i>
+                      <i v-if="isSuccess(k, 'push', cmd.command)"
+                         class="mdi mdi-check mdi-18px"
+                         aria-hidden="true"></i>
+                      <i v-if="isFailed(k, 'push', cmd.command)"
+                         class="mdi mdi-close mdi-18px"
+                         aria-hidden="true"></i>
+                      <div>
+                        <i v-tooltip="{
+                            content: cmd.info,
+                            placement: 'bottom',
+                            classes: ['tooltip'],
+                           }"
+                           class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
+                        <button :disabled="isPending(k, 'push', cmd.command) || isRunning(k, 'push', cmd.command)"
+                                @click="runCommand(k, 'push', cmd.command)"
+                                class="icon-button"
+                        >
+                          <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </a>
-            </li>
-          </ul>
-        </template>
-        </b-collapse>
-      </ul>
+                </a>
+              </li>
+            </ul>
+          </div>
+          </b-collapse>
+        </ul>
+        <ul v-if="scales.length === 0">
+          No Interfaces...
+        </ul>
+      </div>
     </div>
     <div v-if="selectedScale && selectedType && selectedCommand" class="content">
       <div class="content-header">
@@ -231,6 +243,7 @@ export default {
     polling: false,
     showDetails: false,
     scales: {},
+    searchText: '',
     selectedScale: null,
     selectedType: null,
     selectedCommand: null,
@@ -254,7 +267,19 @@ export default {
   },
 
   methods: {
-    sorted,
+    sorted(dict) {
+      let d = sorted(dict);
+      if (this.searchText !== '') {
+        const temp = {};
+        Object.entries(d).forEach(([k, v]) => {
+          if (k.includes(this.searchText)) {
+            temp[k] = v;
+          }
+        });
+        d = temp;
+      }
+      return d;
+    },
 
     changeFormat(format) {
       this.format = format;
@@ -478,7 +503,7 @@ h2.menu-label {
     border-top-right-radius: 0;
     font-size: 0.8rem;
   }
-.menu-label {
+  .menu-label {
     padding-left: 0;
   }
 }
@@ -527,6 +552,11 @@ h2.menu-label {
   overflow-y: auto;
   position: fixed;
   width: 200px;
+}
+
+.submenu-label {
+  margin-bottom:0;
+  margin-left:0.5rem;
 }
 
 .spin {

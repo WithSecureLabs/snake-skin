@@ -1,70 +1,80 @@
 <template>
   <div id="analysis" class="analysis">
     <div class="sidebar">
-      <h2 class="menu-label">Active</h2>
+      <input id="input"
+            class="input"
+            type="text"
+            v-model="searchText"
+            placeholder="Scale..."
+            style="width:190px"
+      >
+      <div>
+        <!--<h2 class="menu-label">Active</h2>-->
         <ul class="menu-list">
-        <b-collapse :open="true" class="menu-section" v-for="(v, k) in sorted(active)" :key=k>
-        <a slot="trigger" class="menu-label" slot-scope="props">
-          <div class="level">
-          <div class="level-left">
-          <span class="scale">{{ k }}</span>
-          </div>
-          <div class="level-right">
-          <i class="mdi mdi-18px"
-             :class="props.open ? 'mdi-menu-down' : 'mdi-menu-right'"
-             aria-hidden="true"></i>
-          </div>
-          </div>
-        </a>
-        <ul class="menu-list">
-          <li>
-            <a v-for="cmd in v" :key="k + cmd.command"
-               :class="{'is-active': isActive(k, cmd.command)}"
-               @click="selectCommand(k, cmd.command)">
-              <div class="level">
-                <div class="level-left">
-                  {{ cmd.command }}
-                </div>
-                <div class="level-right">
-                  <i v-if="isPending(k, cmd.command)"
-                     class="mdi mdi-dots-horizontal mdi-18px"
-                     aria-hidden="true"></i>
-                  <i v-if="isRunning(k, cmd.command)"
-                     class="mdi mdi-loading mdi-18px spin"
-                     aria-hidden="true"></i>
-                  <i v-if="isSuccess(k, cmd.command)"
-                     class="mdi mdi-check mdi-18px"
-                     aria-hidden="true"></i>
-                  <i v-if="isFailed(k, cmd.command)"
-                     class="mdi mdi-close mdi-18px"
-                     aria-hidden="true"></i>
-                  <div>
-                    <i v-tooltip="{
-                        content: cmd.info,
-                        placement: 'bottom',
-                        classes: ['tooltip'],
-                       }"
-                       class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
-                    <button :disabled="isPending(k, cmd.command) || isRunning(k, cmd.command)"
-                            @click="runCommand(k, cmd.command)"
-                            class="icon-button"
-                    >
-                      <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
-                    </button>
+          <b-collapse :open="true" class="menu-section" v-for="(v, k) in sorted(active)" :key=k>
+          <a slot="trigger" class="menu-label submenu-label" slot-scope="props">
+            <div class="level">
+              <div class="level-left">
+                <span class="scale">{{ k }}</span>
+              </div>
+              <div class="level-right">
+                <i class="mdi mdi-18px"
+                   :class="props.open ? 'mdi-menu-down' : 'mdi-menu-right'"
+                   aria-hidden="true"></i>
+              </div>
+            </div>
+          </a>
+          <ul class="menu-list">
+            <li>
+              <a v-for="cmd in v" :key="k + cmd.command"
+                 :class="{'is-active': isActive(k, cmd.command)}"
+                 @click="selectCommand(k, cmd.command)">
+                <div class="level">
+                  <div class="level-left">
+                    - {{ cmd.command }}
+                  </div>
+                  <div class="level-right">
+                    <i v-if="isPending(k, cmd.command)"
+                       class="mdi mdi-dots-horizontal mdi-18px"
+                       aria-hidden="true"></i>
+                    <i v-if="isRunning(k, cmd.command)"
+                       class="mdi mdi-loading mdi-18px spin"
+                       aria-hidden="true"></i>
+                    <i v-if="isSuccess(k, cmd.command)"
+                       class="mdi mdi-check mdi-18px"
+                       aria-hidden="true"></i>
+                    <i v-if="isFailed(k, cmd.command)"
+                       class="mdi mdi-close mdi-18px"
+                       aria-hidden="true"></i>
+                    <div>
+                      <i v-tooltip="{
+                          content: cmd.info,
+                          placement: 'bottom',
+                          classes: ['tooltip'],
+                         }"
+                         class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
+                      <button :disabled="isPending(k, cmd.command) || isRunning(k, cmd.command)"
+                              @click="runCommand(k, cmd.command)"
+                              class="icon-button"
+                      >
+                        <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </a>
+              </a>
+            </li>
+          </ul>
+        </b-collapse>
+      </ul>
+      <!--<h2 class="menu-label">Inactive</h2>-->
+      <ul class="menu-list spacer"></ul>
+        <ul class="menu-list">
+          <li v-for="(v, k) in sorted(inactive)" :key=k>
+            <a class="menu-label" @click="makeActive(k)">{{ k }}</a>
           </li>
         </ul>
-      </b-collapse>
-        </ul>
-      <h2 class="menu-label">Inactive</h2>
-      <ul class="menu-list">
-        <li v-for="(v, k) in sorted(inactive)" :key=k>
-          <a class="menu-label" @click="makeActive(k)">{{ k }}</a>
-        </li>
-      </ul>
+      </div>
     </div>
     <div v-if="selectedScale && selectedCommand" class="content">
       <div class="content-header">
@@ -191,6 +201,7 @@ export default {
     formats: [],
     inactive: {},
     polling: false,
+    searchText: '',
     showDetails: false,
     selectedScale: null,
     selectedCommand: null,
@@ -215,7 +226,19 @@ export default {
   },
 
   methods: {
-    sorted,
+    sorted(dict) {
+      let d = sorted(dict);
+      if (this.searchText !== '') {
+        const temp = {};
+        Object.entries(d).forEach(([k, v]) => {
+          if (k.includes(this.searchText)) {
+            temp[k] = v;
+          }
+        });
+        d = temp;
+      }
+      return d;
+    },
 
     changeFormat(format) {
       this.format = format;
@@ -532,6 +555,14 @@ h2.menu-label {
   overflow-y: auto;
   position: fixed;
   width: 200px;
+}
+
+.spacer {
+  height: 1rem;
+}
+
+.submenu-label {
+  padding-bottom: 0;
 }
 
 .spin {
