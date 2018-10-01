@@ -36,5 +36,11 @@ export default new Router({
       props: true,
       component: () => import('./views/Sample.vue'),
     },
+    {
+      path: '/sample/:sha256_digest*',
+      name: 'sample',
+      props: true,
+      component: () => import('./components/Sample.vue'),
+    },
   ],
 });

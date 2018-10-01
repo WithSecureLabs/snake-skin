@@ -101,6 +101,52 @@
             </tbody>
           </table>
         </div>
+        <div v-if="sample && 'parents' in sample && Object.keys(sample.parents).length > 0" 
+             class="box"
+        >
+          <h2 class="title">Parents</h2>
+          <table class="table no-fixed-table">
+            <thead>
+              <tr>
+                <th>Parent (SHA256 Digest)</th>
+                <th>Submission Types</th>
+              </tr>
+            </thead>
+            <tbody>
+             <tr v-for="(v, k) in sample.parents" :key="k">
+                <td>
+                  <router-link tag='a' :to="'/sample/' + k">{{ k }}</router-link>
+                </td>
+                <td>
+                  <tags :tags="v.join(',')"></tags>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-if="sample && 'children' in sample && Object.keys(sample.children).length > 0" 
+             class="box"
+        >
+          <h2 class="title">Children</h2>
+          <table class="table no-fixed-table">
+            <thead>
+              <tr>
+                <th>Child (SHA256 Digest)</th>
+                <th>Submission Types</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(v, k) in sample.children" :key="k">
+                <td>
+                  <router-link tag='a' :to="'/sample/' + k">{{ k }}</router-link>
+                </td>
+                <td>
+                  <tags :tags="v.join(',')"></tags>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <template v-if="hex">
           <div class="box">
             <h1 class="title">Hexdump</h1>
