@@ -7,10 +7,13 @@ export function getItem(obj, path) {
   }
 }
 
-export function toCaps(string) {
-  // Split on space then capitalise
+export function toCaps(string, { delimiter } = {}) {
+  let delim = ' ';
+  if (delimiter) {
+    delim = delimiter;
+  }
   const words = [];
-  string.split(' ').forEach((word) => {
+  string.split(delim).forEach((word) => {
     words.push(word.charAt(0).toUpperCase() + word.slice(1));
   });
   return words.join(' ');

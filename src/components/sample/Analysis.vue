@@ -113,11 +113,26 @@
         </div>
         <div v-if="showDetails">
           <b-field label="Timeout">
-            <b-input v-model="timeout" placeholder="600"></b-input>
+            <b-input v-model="timeout" placeholder="Enter Timeout... (default: 600)"></b-input>
           </b-field>
           <template v-for="(v, k) in commandArguments(selectedScale, selectedCommand)">
-            <b-field :label="k" :key="k">
-              <b-input v-model="$data.arguments[k]" :placeholder="'Enter ' + k"></b-input>
+            <b-field :label="toCaps(k, {'delimiter': '_'})" :key="k">
+              <b-select v-if="v.values.length > 0"
+                        v-model="$data.arguments[k]"
+                        :placeholder="getDefaultArgument(v)"
+              >
+                <option v-if="v.default === null" value="null">None</option>
+                <option v-for="value in v.values" :key="value" :value="value">{{ value }}</option>
+              </b-select>
+              <b-checkbox v-else-if="(v.type === 'boolean') && ($data.arguments[k] = v.default)"
+                          v-model="$data.arguments[k]"
+              >
+                {{ toCaps(k) }}
+              </b-checkbox>
+              <b-input v-else
+                       v-model="$data.arguments[k]"
+                       :placeholder="'Enter ' + toCaps(k, {'delimiter': '_'}) + '...'"
+              ></b-input>
             </b-field>
           </template>
         </div>
@@ -144,7 +159,7 @@
 import highlightjs from 'highlightjs';
 import { postCommand, getCommand, getCommands } from '@/api/command';
 import { FORMATS } from '@/settings';
-import { sorted } from '@/utils/helpers';
+import { sorted, toCaps } from '@/utils/helpers';
 
 const marked = require('marked-pax');
 
@@ -226,6 +241,8 @@ export default {
   },
 
   methods: {
+    toCaps,
+
     sorted(dict) {
       let d = sorted(dict);
       if (this.searchText !== '') {
@@ -238,6 +255,13 @@ export default {
         d = temp;
       }
       return d;
+    },
+
+    getDefaultArgument(argument) {
+      if (argument.default == null) {
+        return 'None';
+      }
+      return argument.default;
     },
 
     changeFormat(format) {
@@ -356,11 +380,16 @@ export default {
     },
 
     runCommand(scale, command) {
+      let { timeout } = this;
+      if (this.timeout === '') {
+        timeout = 600;
+      }
+
       postCommand(
         this.sha256_digest,
         scale,
         command,
-        { args: this.arguments, timeout: this.timeout },
+        { args: this.arguments, timeout },
       ).then((resp) => {
         if (typeof this.executed[scale] === 'undefined') {
           this.executed[scale] = {};
@@ -397,7 +426,7 @@ export default {
 
       this.arguments = {};
       this.showDetails = false;
-      this.timeout = '600';
+      this.timeout = '';
 
       // Handle formats
       let supportedFormats = [];

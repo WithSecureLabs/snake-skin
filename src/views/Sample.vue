@@ -121,6 +121,18 @@ export default {
   },
 
   watch: {
+    activeTab() {
+      const params = { sha256_digest: this.sha256_digest };
+      if (this.activeTab === 1) {
+        params.tab = 'notes';
+      } else if (this.activeTab === 2) {
+        params.tab = 'analysis';
+      } else if (this.activeTab === 3) {
+        params.tab = 'interfaces';
+      }
+      this.$router.push({ name: this.$route.name, params });
+    },
+
     sha256_digest() {
       this.loadSample();
     },
