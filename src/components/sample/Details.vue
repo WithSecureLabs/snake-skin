@@ -252,7 +252,8 @@ export default {
       };
       patchSample(this.sample, data).then((resp) => {
         if (resp.status === 'success') {
-          this.sample.description = resp.data.sample.description;
+          const fileType = this.sample.file_type;
+          this.sample.description = resp.data[fileType].description;
         }
         this.editingDescription = false;
       });
