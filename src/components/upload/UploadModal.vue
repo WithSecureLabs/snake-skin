@@ -28,6 +28,11 @@
                     Sample
                   </b-radio>
                 </div>
+                <div v-if="sample_type=='file'" class="field">
+                  <b-radio v-model="submission_type" native-value="disks">
+                    Samples
+                  </b-radio>
+                </div>
                 <div v-for="(v, k) in sorted(uploads)" class="field" :key="k">
                   <b-radio v-model="submission_type" :native-value="k">
                     {{ toCaps(k) }}
@@ -54,6 +59,50 @@
                         {{ files[0].name }}
                       </span>
                     </b-field>
+                  </div>
+                  <div class="level-right">
+                    <span v-if="typeof this.errors['disk'] !== 'undefined'"
+                          class="icon is-right has-text-danger">
+                      <i class="mdi mdi-alert-circle mdi-24px"></i>
+                    </span>
+                  </div>
+                </div>
+              </b-field>
+            </template>
+            <template v-else-if="submission_type === 'disks'">
+              <b-field label="Samples">
+                <div class="level">
+                  <div class="level-left">
+                    <b-field>
+                      <b-upload v-model="files"
+                                multiple
+                                drag-drop
+                      >
+                        <section class="section">
+                          <div class="content has-text-centered">
+                            <p>
+                              <b-icon icon="upload" size="is-large"></b-icon>
+                            </p>
+                            <p>Drop your files here or click to upload</p>
+                          </div>
+                        </section>
+                      </b-upload>
+                    </b-field>
+
+                    <div class="tags" style="align-self:baseline;margin-left:0.5rem;">
+                      <span v-for="(file, index) in files"
+                            :key="index"
+                            class="tag is-primary"
+                      >
+                        {{file.name}}
+                      <button class="delete is-small"
+                              type="button"
+                              @click="deleteFile(index)">
+                      </button>
+                    </span>
+                  </div>
+
+
                   </div>
                   <div class="level-right">
                     <span v-if="typeof this.errors['disk'] !== 'undefined'"
@@ -94,27 +143,30 @@
               </transition>
             </template>
 
-            <b-field label="Archive">
-              <div class="field">
-                <b-checkbox v-model="extract">
-                  Extract sample on upload
-                </b-checkbox>
-              </div>
-            </b-field>
-
-            <transition name="slide-fade">
-              <template v-if="extract">
+            <!-- TODO: For now disable this until/if we decide to support multiple things for multiple files -->
+            <template v-if="submission_type !== 'disks'">
+              <b-field label="Archive">
                 <div class="field">
-                  <label class="label">Archive Password</label>
-                  <div class="control">
-                    <input class="input"
-                           type="text"
-                           v-model="password"
-                           placeholder="Archive Password">
-                  </div>
+                  <b-checkbox v-model="extract">
+                    Extract sample on upload
+                  </b-checkbox>
                 </div>
-              </template>
-            </transition>
+              </b-field>
+
+              <transition name="slide-fade">
+                <template v-if="extract">
+                  <div class="field">
+                    <label class="label">Archive Password</label>
+                    <div class="control">
+                      <input class="input"
+                             type="text"
+                             v-model="password"
+                             placeholder="Archive Password">
+                    </div>
+                  </div>
+                </template>
+              </transition>
+            </template>
 
             <b-field label="Tags">
               <b-taginput
@@ -210,7 +262,7 @@
           </b-tab-item>
 
           <b-tab-item label="Progress">
-            <progress class="progress" value="15" max="100">15%</progress>
+            <progress class="progress" :value="progress" max="100"></progress>
           </b-tab-item>
 
           <b-tab-item label="Summary">
@@ -221,98 +273,96 @@
               <pre>{{ uploaded.error }}</pre>
             </div>
             <template v-else>
-              <div class="box">
-                <h1 class="title">Details</h1>
-                <table class="table">
-                  <tbody>
-                    <tr>
-                      <th>Name</th>
-                      <td v-if="uploaded.sample">
-                        {{ uploaded.sample.name }}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Size</th>
-                      <td v-if="uploaded.sample">
-                        {{ Math.ceil(uploaded.sample.size / 100) / 10 }} KB
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>MIME</th>
-                      <td v-if="uploaded.sample">
-                        {{ uploaded.sample.mime }}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Submission Type</th>
-                      <td v-if="uploaded.sample">
-                        <tags :tags="uploaded.sample.submission_type"></tags>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Submission Time</th>
-                      <td v-if="uploaded.sample">
-                        {{ uploaded.sample.timestamp }}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Magic</th>
-                      <td v-if="uploaded.sample">
-                        {{ uploaded.sample.magic }}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>SHA256 Digest</th>
-                      <td v-if="uploaded.sample">
-                        {{ uploaded.sample.sha256_digest }}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Tags</th>
-                      <td v-if="uploaded.sample">
-                        <tags :tags="uploaded.sample.tags"></tags>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div v-if="typeof uploaded.commands !== 'undefined'" class="box">
-                <h1 class="title">Queued Commands</h1>
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Scale</th>
-                      <th>Command</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="command in uploaded.commands" :key="command.scale + command.command">
-                      <td>{{ command.scale }}</td>
-                      <td>{{ command.command }}</td>
-                      <td>{{ command.status }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div v-if="typeof uploaded.pushers !== 'undefined'" class="box">
-                <h1 class="title">Queued Pushers</h1>
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Scale</th>
-                      <th>Pusher</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="pusher in uploaded.pushers" :key="pusher.scale + pusher.command">
-                      <td>{{ pusher.scale }}</td>
-                      <td>{{ pusher.command }}</td>
-                      <td>{{ pusher.status }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div v-for="sample in this.uploaded.samples" :key="sample.sha256_digest">
+                <div class="box">
+                  <h1 class="title">Details</h1>
+                  <table class="table">
+                    <tbody>
+                      <tr>
+                        <th>Name</th>
+                        <td>{{ sample.name }}</td>
+                      </tr>
+                      <tr>
+                        <th>Size</th>
+                        <td>{{ Math.ceil(sample.size / 100) / 10 }} KB</td>
+                      </tr>
+                      <tr>
+                        <th>MIME</th>
+                        <td>{{ sample.mime }}</td>
+                      </tr>
+                      <tr>
+                        <th>Submission Type</th>
+                        <td>
+                          <tags :tags="sample.submission_type"></tags>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Submission Time</th>
+                        <td>{{ sample.timestamp }}</td>
+                      </tr>
+                      <tr>
+                        <th>Magic</th>
+                        <td>{{ sample.magic }}</td>
+                      </tr>
+                      <tr>
+                        <th>SHA256 Digest</th>
+                        <td>{{ sample.sha256_digest }}</td>
+                      </tr>
+                      <tr>
+                        <th>Tags</th>
+                        <td>
+                          <tags :tags="sample.tags"></tags>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div v-if="typeof uploaded.commands[sample.sha256_digest] !== 'undefined'"
+                     class="box"
+                >
+                  <h1 class="title">Queued Commands</h1>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Scale</th>
+                        <th>Command</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="command in uploaded.commands[sample.sha256_digest]"
+                          :key="command.scale + command.command"
+                      >
+                        <td>{{ command.scale }}</td>
+                        <td>{{ command.command }}</td>
+                        <td>{{ command.status }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div v-if="typeof uploaded.pushers[sample.sha256_digest] !== 'undefined'"
+                     class="box"
+                >
+                  <h1 class="title">Queued Pushers</h1>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Scale</th>
+                        <th>Pusher</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="pusher in uploaded.pushers[sample.sha256_digest]"
+                          :key="pusher.scale + pusher.command"
+                      >
+                        <td>{{ pusher.scale }}</td>
+                        <td>{{ pusher.command }}</td>
+                        <td>{{ pusher.status }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </template>
           </b-tab-item>
@@ -323,7 +373,7 @@
           <div class="level-left">
             <button class="button is-danger" @click="close()">Close</button>
           </div>
-          <div class="level-right">
+          <div v-if="submission_type !== 'disks'" class="level-right">
             <button v-if="!failed"
                     class="button is-primary"
                     @click="proceed()"
@@ -367,6 +417,8 @@ export default {
     files: [],
     page: 0,
     password: '',
+    progress: 0,
+    progressTimer: null,
     sample_type: 'file',
     submission_type: 'disk',
     tags: [],
@@ -384,7 +436,11 @@ export default {
 
     alreadyUploaded: false,
     failed: false,
-    uploaded: {},
+    uploaded: {
+      commands: {},
+      pushers: {},
+      samples: [],
+    },
   }),
 
   mounted() {
@@ -413,6 +469,10 @@ export default {
           this.pshs.push(psh);
         }
       }
+    },
+
+    deleteFile(index) {
+      this.files.splice(index, 1);
     },
 
     isDanger(field) {
@@ -473,7 +533,7 @@ export default {
       if (this.page === 1) {
         this.errors = {};
         // TODO: Set is-danger and prevent progression
-        if (this.submission_type === 'disk') {
+        if (this.submission_type === 'disk' || this.submission_type === 'disks') {
           if (this.files.length === 0) {
             this.errors.disk = true;
             return;
@@ -507,11 +567,12 @@ export default {
 
     proceed() {
       this.close();
-      const { sample } = this.uploaded;
+      const sample = this.uploaded.samples[0];
       this.$router.push(`/${sample.file_type}/${sample.sha256_digest}`);
     },
 
     submit() {
+      // XXX: This function is horrendous as is some of the structuring here
       this.page = 3;
       let body = {};
       let path = '';
@@ -532,6 +593,23 @@ export default {
 
         body = form;
         path = `upload/${this.sample_type}`;
+      } else if (this.submission_type === 'disks') {
+        // This is a custom uploader by manipulating form :)
+        const data = {};
+        const form = new FormData();
+        this.files.forEach((file, index) => {
+          data[index] = {
+            name: file.name,
+            description: this.description,
+            file_type: this.sample_type,
+            tags: this.tags.join(','),
+          };
+          form.append(index, file);
+        });
+        form.append('data', JSON.stringify(data));
+
+        body = form;
+        path = 'upload/files';
       } else {
         // Scale upload based
         const data = {
@@ -553,11 +631,17 @@ export default {
         body = JSON.stringify(data);
         path = `scale/${this.submission_type}/upload`;
       }
+
+      // Start upload progresser
+      this.updateProgress();
+
       // Don't use the API as we handle this in a special way
       fetch(`${SNAKE_API}/${path}`, {
         method: 'POST',
         body,
       }).then((res) => {
+        // Kill timer
+        clearTimeout(this.progressTimer);
         // 409 means already uploaded, progress to page 5
         if (res.status === 409) {
           this.alreadyUploaded = true;
@@ -566,39 +650,45 @@ export default {
         }
         return res.json();
       }).then(async (data) => {
-        const { sample } = data.data;
-        this.uploaded.sample = sample;
+        // Handle sample and samples with simple if
+        if ('samples' in data.data) {
+          this.uploaded.samples = data.data.samples;
+        } else {
+          this.uploaded.samples = [data.data.sample];
+        }
         if (!this.alreadyUploaded) {
-          // Queue the commands and interfaces
-          const cmds = [];
-          this.cmds.forEach((cmd) => {
-            const [scale, command] = cmd.split(':');
-            cmds.push({
-              scale,
-              command,
-              sha256_digests: [sample.sha256_digest],
-              asynchronous: true,
+          this.uploaded.samples.forEach(async (sample) => {
+            // Queue the commands and interfaces
+            const cmds = [];
+            this.cmds.forEach((cmd) => {
+              const [scale, command] = cmd.split(':');
+              cmds.push({
+                scale,
+                command,
+                sha256_digests: [sample.sha256_digest],
+                asynchronous: true,
+              });
             });
-          });
-          if (cmds.length > 0) {
-            const resp = await postCommands(cmds);
-            if (resp.status === 'success') {
-              this.uploaded.commands = resp.data.commands;
+            if (cmds.length > 0) {
+              const resp = await postCommands(cmds);
+              if (resp.status === 'success') {
+                this.uploaded.commands[sample.sha256_digest] = resp.data.commands;
+              }
             }
-          }
-          if (this.pshs.length > 0) {
-            this.uploaded.pushers = [];
-          }
-          this.pshs.forEach(async (psh) => {
-            const [scale, command] = psh.split(':');
-            const resp = await postScaleInterface(scale, 'push', command, sample.sha256_digest);
-            this.uploaded.pushers.push({
-              scale,
-              command: resp.data.command,
-              status: resp.status,
+            if (this.pshs.length > 0) {
+              this.uploaded.pushers[sample.sha256_digest] = [];
+            }
+            this.pshs.forEach(async (psh) => {
+              const [scale, command] = psh.split(':');
+              const resp = await postScaleInterface(scale, 'push', command, sample.sha256_digest);
+              this.uploaded.pushers[sample.sha256_digest].push({
+                scale,
+                command: resp.data.command,
+                status: resp.status,
+              });
             });
+            this.uploaded = Object.assign({}, this.uploaded);
           });
-          this.uploaded = Object.assign({}, this.uploaded);
         }
         this.page = 4;
       }).catch((e) => {
@@ -609,6 +699,13 @@ export default {
           this.page = 4;
         });
       });
+    },
+
+    updateProgress() {
+      this.progress = (this.progress + 5) % 101;
+      this.progressTimer = setTimeout(() => {
+        this.updateProgress();
+      }, 500);
     },
   },
 
