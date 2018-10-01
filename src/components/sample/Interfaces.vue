@@ -47,7 +47,7 @@
                          }"
                          class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
                       <button :disabled="isPending(k, 'pull', cmd.command) || isRunning(k, 'pull', cmd.command)"
-                              @click="runCommand(k, cmd.command)"
+                              @click="runCommand(k, 'pull',cmd.command)"
                               class="icon-button"
                       >
                         <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
@@ -91,7 +91,7 @@
                          }"
                          class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
                       <button :disabled="isPending(k, 'push', cmd.command) || isRunning(k, 'push', cmd.command)"
-                              @click="runCommand(k, cmd.command)"
+                              @click="runCommand(k, 'push', cmd.command)"
                               class="icon-button"
                       >
                         <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
@@ -258,7 +258,7 @@ export default {
 
     changeFormat(format) {
       this.format = format;
-      this.runCommand(this.selectedScale, this.selectedCommand);
+      this.runCommand(this.selectedScale, this.selectedType, this.selectedCommand);
     },
 
     isActive(scale, type, command) {
@@ -271,7 +271,7 @@ export default {
       return this.isPending(scale, type, command) || this.isRunning(scale, type, command);
     },
 
-    runCommand(scale, command) {
+    runCommand(scale, type, command) {
       if (typeof this.executed[scale] === 'undefined') {
         this.executed[scale] = {};
       }
@@ -286,7 +286,7 @@ export default {
       });
       postScaleInterface(
         scale,
-        this.selectedType,
+        type,
         command,
         this.sha256_digest,
         { args: this.arguments, format: this.format, timeout: this.timeout },
