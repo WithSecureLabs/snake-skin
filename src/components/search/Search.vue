@@ -1,5 +1,5 @@
 <template>
-  <div id="search" class="search">
+  <div v-if="all === null" id="search" class="search">
      <input id="input"
             class="input"
             type="text"
@@ -15,9 +15,26 @@ import SearchModal from '@/components/search/SearchModal.vue';
 
 export default {
   name: 'Search',
+  props: {
+    all: {
+      default: () => null,
+      type: String,
+    },
+  },
   data: () => ({
     searchText: '',
   }),
+
+  mounted() {
+    // If 'all' is set we are coming here from the URL so set the searchText
+    // and proceed!
+    // TODO: This is hacky, the above should really be in navbar and this
+    // should be standalone to invoke search modal as non modal
+    if (this.all !== null) {
+      this.searchText = this.all;
+      this.search(this.searchText);
+    }
+  },
 
   methods: {
     search(text) {

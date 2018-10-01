@@ -42,5 +42,11 @@ export default new Router({
       props: true,
       component: () => import('./components/Sample.vue'),
     },
+    {
+      path: '/search',
+      name: 'search',
+      props: route => ({ all: route.query.all }),
+      component: () => import('./components/search/Search.vue'),
+    },
   ],
 });
