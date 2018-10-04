@@ -99,24 +99,38 @@ export default {
         return;
       }
       this.scales = resp.data.scales;
+
+      // Async is being a bitch so we have to create the lists then run the queries
+      // NOTE: Promise.all is order preserving
+      const commandScales = [];
+      const interfaceScales = [];
       this.scales.forEach((scale) => {
         // Loop the components and load them
         scale.components.forEach((component) => {
           if (component === 'commands') {
-            getScaleCommands(scale.name).then((res) => {
-              if (res.status === 'success') {
-                this.$set(this.commands, scale.name, res.data.commands);
-              }
-            });
+            commandScales.push(scale.name);
           } else if (component === 'interface') {
-            getScaleInterface(scale.name).then((res) => {
-              if (res.status === 'success') {
-                this.$set(this.interfaces, scale.name, res.data.interface);
-              }
-            });
+            interfaceScales.push(scale.name);
           }
         });
       });
+      let results;
+      const commands = {};
+      const interfaces = {};
+      results = await Promise.all(commandScales.map(scale => getScaleCommands(scale)));
+      results.forEach((result, i) => {
+        if (result.status === 'success') {
+          commands[commandScales[i]] = result.data.commands;
+        }
+      });
+      results = await Promise.all(interfaceScales.map(scale => getScaleInterface(scale)));
+      results.forEach((result, i) => {
+        if (result.status === 'success') {
+          interfaces[interfaceScales[i]] = result.data.interfaces;
+        }
+      });
+      this.commands = commands;
+      this.interfaces = interfaces;
     },
   },
 
@@ -148,6 +162,14 @@ export default {
 
 .tabs {
   margin-bottom: 0 !important;
+}
+
+.tab-content {
+  height: calc(100vh - 160px);
+}
+
+.tab-item {
+  height: 100%;
 }
 
 #breadcrumbs {

@@ -149,8 +149,8 @@
         </div>
         <div v-if="showDetails">
           <b-field label="Timeout">
-            <b-input type="number" 
-                     v-model="timeout" 
+            <b-input type="number"
+                     v-model="timeout"
                      placeholder="Enter Timeout... (default: 600)"
             ></b-input>
           </b-field>
@@ -323,6 +323,11 @@ export default {
     },
 
     runCommand(scale, type, command) {
+      let { timeout } = this;
+      if (this.timeout === '') {
+        timeout = 600;
+      }
+
       if (typeof this.executed[scale] === 'undefined') {
         this.executed[scale] = {};
       }
@@ -340,7 +345,7 @@ export default {
         type,
         command,
         this.sha256_digest,
-        { args: this.arguments, format: this.format, timeout: this.timeout },
+        { args: this.arguments, format: this.format, timeout },
       ).then((resp) => {
         if (resp.status === 'success') {
           this.$set(this.executed[scale], command, {
@@ -409,7 +414,7 @@ export default {
 
       this.arguments = {};
       this.showDetails = false;
-      this.timeout = '600';
+      this.timeout = '';
 
       // Handle formats
       let supportedFormats = [];
