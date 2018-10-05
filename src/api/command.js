@@ -1,20 +1,23 @@
 import { SNAKE_API } from '@/settings';
 import Vue from 'vue';
 
-export function getCommand(SHA256Digest, scale, command, { format } = {}) {
+export function getCommand(SHA256Digest, scale, command, { args, format } = {}) {
   let path = 'command';
-  const args = [
+  const params = [
     `sha256_digest=${SHA256Digest}`,
     `scale=${scale}`,
     `command=${command}`,
   ];
-  if (format) {
-    args.push(`format=${format}`);
+  if (args) {
+    params.push(`args=${JSON.stringify(args)}`);
   }
-  path = `${path}?${args.join('&')}`;
+  if (format) {
+    params.push(`format=${format}`);
+  }
+  path = `${path}?${params.join('&')}`;
   return new Promise((resolve) => {
-    Vue.http.get(`${SNAKE_API}/${path}`).then((response) => {
-      resolve(response.data);
+    fetch(`${SNAKE_API}/${path}`).then(res => res.json()).then((data) => {
+      resolve(data);
     }).catch((e) => {
       if (typeof e.body !== 'undefined') {
         resolve(e.body);
@@ -64,10 +67,17 @@ export function postCommand(SHA256Digest, scale, command, { args, format, timeou
   });
 }
 
-export function getCommands({ SHA256Digest } = {}) {
+export function getCommands({ noOutput, SHA256Digest } = {}) {
   let path = 'commands';
+  const params = [];
+  if (noOutput) {
+    params.push(`output=${!noOutput}`);
+  }
   if (SHA256Digest) {
-    path = `${path}?sha256_digest=${SHA256Digest}`;
+    params.push(`sha256_digest=${SHA256Digest}`);
+  }
+  if (params.length > 0) {
+    path = `${path}?${params.join('&')}`;
   }
   return new Promise((resolve) => {
     Vue.http.get(`${SNAKE_API}/${path}`).then((response) => {

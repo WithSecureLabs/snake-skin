@@ -35,12 +35,13 @@
 
             <!-- Commands -->
             <ul class="menu-list">
-              <command v-for="(data, command) in v.commands" :key="k + ':' + command"
-                       :scale="k"
-                       :command="data"
-                       :selected.sync="selected"
-                       :run-command="runCommand"
-              ></command>
+              <app-command v-for="(data, command) in v.commands" :key="k + ':' + command"
+                           :scale="k"
+                           :command="command"
+                           :data="data"
+                           :selected.sync="selected"
+                           :run-command="runCommand"
+              ></app-command>
             </ul>
           </b-collapse>
         </ul>
@@ -68,21 +69,23 @@
               <!-- TODO -->
               <p class="heading">
                 Arguments
-                <a v-if="selectedCommand"
+                <a v-if="activeCommand"
                    @click="showArguments = !showArguments"
                 >({{ showArgumentsText }})</a>
               </p>
-              <b-dropdown disabled>
+              <b-dropdown :disabled="!activeCommand || !activeCommand.args">
                 <button class="button is-outlined" slot="trigger">
-                  <span>defaults</span>
+                  <span v-if="!activeCommand || !activeCommand.args">No Arguments</span>
+                  <span v-else-if="activeCommand.selected === '{}'">Defaults</span>
+                  <span v-else>{{ activeCommand.selected }}</span>
                   <b-icon icon="menu-down"></b-icon>
                 </button>
-                <!--
-                <b-dropdown-item v-for="format in formats"
-                                 :key=format
-                                 @click="changeFormat(format)"
-                >{{ format }}</b-dropdown-item>
-                -->
+                <template v-if="activeCommand">
+                  <b-dropdown-item v-for="(v, k) in activeCommand.executed"
+                                   :key="k"
+                                   @click="activeCommand.selected = k; getSelectedCommand()"
+                  >{{ v.args }}</b-dropdown-item>
+                </template>
               </b-dropdown>
             </div>
           </div>
@@ -125,7 +128,7 @@
           ></b-input>
         </b-field>
         <app-arguments v-if="selectedCommand"
-                       :arguments="getArguments"
+                       :arguments="activeCommand.args"
                        :data="selectedCommand.args"
         ></app-arguments>
       </div>
@@ -153,7 +156,7 @@ export default {
   name: 'Analysis',
   components: {
     'app-arguments': Arguments,
-    command: Command,
+    'app-command': Command,
     'output-content': Output,
   },
   props: {
@@ -167,14 +170,15 @@ export default {
     },
   },
   data: () => ({
-    executed: [], // All executions for a given command
     filter: '', // Scale sidebar filter
-    format: '', // Current format
-    formats: [], // Supported formats for selected command
     polling: false, // Polling for commands
     scales: {}, // Scales and their commands, based on the commands prop
-    selected: ':', // Currently selected scale:command TODO: Make computed
+    selected: ':', // Currently selected scale:command
     showArguments: false, // Toggle argument panel
+
+    // TODO: Should be per command
+    format: '', // Current format
+    formats: [], // Supported formats for selected command
   }),
 
   created() {
@@ -204,12 +208,20 @@ export default {
       return this.filtered(scales);
     },
 
-    selectedCommand() {
+    activeCommand() {
       const [scale, command] = this.selected.split(':');
       if (scale === '' || command === '') {
         return null;
       }
-      return this.scales[scale].commands[command].command;
+      return this.scales[scale].commands[command];
+    },
+
+    selectedCommand() {
+      const selectedCommand = this.activeCommand;
+      if (selectedCommand === null) {
+        return null;
+      }
+      return selectedCommand.executed[selectedCommand.selected];
     },
 
     showArgumentsText() {
@@ -230,40 +242,44 @@ export default {
     },
 
     async getSelectedCommand() {
-      // Get the current scale:command
+      // Get the data required for the query
       const [scale, command] = this.selected.split(':');
-
-      // Have we run this before?
-      const currentCommand = this.scales[scale].commands[command].command;
-      if (currentCommand === null) {
+      const selectedCmd = this.scales[scale].commands[command];
+      const key = selectedCmd.selected;
+      if (key === null) {
         return;
       }
+      const executed = selectedCmd.executed[key];
 
-      // Ask for selected command
+      // Run query
       const resp = await getCommand(
         this.sha256_digest,
         scale,
         command,
-        { args: currentCommand.args, format: this.format },
+        { args: executed.args, format: this.format },
       );
 
-      // Update the current command
+      // Update the object
       if (resp.status === 'success') {
         const cmd = resp.data.command;
-        // Blankout timeout if it is default
+        // Blank out defaults
         if (cmd.timeout === 600) {
           cmd.timeout = '';
         }
+        if (cmd.status === 'failed') {
+          cmd.output = 'Command failed'; // XXX: The core should do this
+        }
         // Update
-        this.scales[scale].commands[command].command = cmd;
+        selectedCmd.executed[key] = cmd;
       } else if (resp.status === 'error') {
         // Create a dummy object
         const cmd = resp.data;
         cmd.output = resp.message;
         cmd.timeout = '';
-        this.scales[scale].commands[command].command = cmd;
+        // Update
+        selectedCmd.executed[key] = cmd;
       } else {
-        this.scales[scale].commands[command].command = null;
+        selectedCmd.executed[key] = null;
       }
     },
 
@@ -282,88 +298,103 @@ export default {
       return d;
     },
 
-    pollCommands() {
+    async pollCommands() {
       if (this.polling) {
         return;
       }
       this.polling = true;
-      // Loop through the executed dictionary for pendings and runnings pushing these for query
-      // TODO: Don't ask for output until we hit finished!
-      // TODO: Handle args too
-      // TODO: Only get what we need...
-      const cmds = {};
+
+      // Build array of commands to query
+      const cmds = [];
       Object.entries(this.scales).forEach(([scale, { commands }]) => {
-        Object.entries(commands).forEach(([command, data]) => {
-          if (data.command && (this.isPending(data.command) || this.isRunning(data.command))) {
-            cmds[scale + command] = null;
-          }
+        Object.entries(commands).forEach(([command, { executed }]) => {
+          Object.values(executed).forEach(({ args }) => {
+            cmds.push({
+              scale,
+              command,
+              args,
+            });
+          });
         });
       });
 
-      // Query what we have above
-      if (Object.keys(cmds).length > 0) {
-        getCommands({ SHA256Diges: this.sha256_digest }).then((resp) => {
-          if (resp.status === 'success') {
-            const { commands } = resp.data;
-            let shouldPoll = false;
-            commands.forEach((cmd) => {
-              if (typeof cmds[cmd.scale + cmd.command] !== 'undefined') {
-                // Do we still need to poll?
-                if (typeof cmd.end_time === 'undefined') {
-                  shouldPoll = true;
-                }
-                // Are we the current command?
-                // TODO: Couple more edge cases to handle here
-                const [scale, command] = this.selected.split(':');
-                if (scale === cmd.scale && command === cmd.command) {
-                  // Now are we the active one?
-                  const currentCommand = this.scales[cmd.scale].commands[cmd.command].command;
-                  if (JSON.stringify(currentCommand.args) === JSON.stringify(cmd.args)) {
-                    this.scales[cmd.scale].commands[cmd.command].command = cmd;
-                    // Are we finished?
-                    if (!this.isPending(cmd) && !this.isRunning(cmd)) {
-                      this.getSelectedCommand();
-                    }
-                  }
-                  // TODO: Populate executed
-                } else {
-                  this.scales[cmd.scale].commands[cmd.command].command = cmd;
-                }
+      let shouldPoll = false;
+
+      // Only query if we have things to query
+      if (cmds.length > 0) {
+        // XXX: We can't query using the above cause we need a way to do this without a body!
+        const resp = await getCommands({ noOutput: true, SHA256Digest: this.sha256_digest });
+        if (resp.status === 'success') {
+          const { commands } = resp.data;
+          commands.forEach((cmd) => {
+            // We could have legacy scales in the commands db so we need to ignore those
+            // TODO: Won't be needed once the XXX is addressed
+            if (Object.keys(this.scales).indexOf(cmd.scale) !== -1) {
+              // Do we still need to poll?
+              if (typeof cmd.end_time === 'undefined') {
+                shouldPoll = true;
               }
-              // Merge then force update
-              this.scales = Object.assign({}, this.scales);
-            });
-            this.polling = false;
-            if (shouldPoll) {
-              setTimeout(() => { this.pollCommands(); }, 5000);
+              // Get command object for updating
+              const command = this.scales[cmd.scale].commands[cmd.command];
+              // Get the key for executed
+              const key = JSON.stringify(cmd.args);
+              // Previous status
+              // const { status } = command.executed[key];
+
+              // Is this the selected command that needs updating?
+              const selected = this.selected.split(':');
+              if (cmd.scale === selected[0] &&
+                  cmd.command === selected[1] &&
+                  key === command.selected &&
+                  !this.isPending(cmd) &&
+                  !this.isRunning(cmd)) {
+                this.getSelectedCommand();
+              } else {
+                // Update the command
+                command.executed[key] = cmd;
+              }
             }
-          }
-        });
-      } else {
-        this.polling = false;
+          });
+        }
+        // Force an update
+        this.scales = Object.assign({}, this.scales);
+      }
+
+      this.polling = false;
+      if (shouldPoll) {
+        setTimeout(() => { this.pollCommands(); }, 5000);
       }
     },
 
     runCommand(scale, command) {
-      // TODO: Take name not object
-      // Queue it and leave the work to poll, assume pending
-      const cmd = this.scales[scale].commands[command.name].command;
-      let { timeout } = cmd;
+      // Get the selected command
+      const cmd = this.scales[scale].commands[command];
+      const key = cmd.selected;
+      const selectedCmd = cmd.executed[key];
+      const { args } = selectedCmd;
+      let { timeout } = selectedCmd;
       if (this.timeout === '') {
         timeout = 600;
       }
-      const { args } = cmd;
+
+      // Queue it and leave the work to poll
       postCommand(
         this.sha256_digest,
         scale,
-        command.name, // TODO:
+        command, // TODO:
         { args, timeout },
       ).then((resp) => {
         if (resp.status === 'success') {
-          this.scales[scale].commands[command.name].command = resp.data.command;
+          cmd.executed[key] = resp.data.command;
           this.pollCommands();
+        } else {
+          console.error(resp);
         }
       });
+    },
+
+    selectArguments(args) {
+      console.info(args);
     },
 
     isFailed(command) {
@@ -396,7 +427,8 @@ export default {
             name: cmd.command,
             formats: cmd.formats,
             info: cmd.info,
-            command: null, // Last execution
+            executed: {},
+            selected: null, // Key to entry in executed
           };
         });
         scales[scale] = {
@@ -405,14 +437,23 @@ export default {
         };
       });
       // Load the executed into the above
-      const resp = await getCommands({ SHA256Digest: this.sha256_digest });
+      const resp = await getCommands({ noOutput: true, SHA256Digest: this.sha256_digest });
       if (resp.status === 'success') {
         const cmds = resp.data.commands;
         cmds.forEach((cmd) => {
           // We could have legacy scales in the commands db so we need to ignore those
           if (Object.keys(scales).indexOf(cmd.scale) !== -1) {
+            // Activate the scale
             scales[cmd.scale].active = true;
-            scales[cmd.scale].commands[cmd.command].command = cmd;
+
+            // Use args as the key and store them in executed
+            const args = JSON.stringify(cmd.args);
+            scales[cmd.scale].commands[cmd.command].executed[args] = cmd;
+
+            // First command we get for a scale:command is the most recent execution
+            if (!scales[cmd.scale].commands[cmd.command].selected) {
+              scales[cmd.scale].commands[cmd.command].selected = args;
+            }
           }
         });
       }

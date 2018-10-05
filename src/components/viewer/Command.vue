@@ -1,38 +1,38 @@
 <template>
   <li class="command">
     <a :class="{'is-active': isSelected}"
-       @click="updateSelected(scale + ':' + command.name)"
+       @click="updateSelected(scale + ':' + command)"
     >
       <div class="level">
         <div class="level-left">
-          - {{ command.name }}
+          - {{ command }}
         </div>
         <div class="level-right">
-          <i v-if="isPending(command)"
+          <i v-if="isPending(data)"
              class="mdi mdi-dots-horizontal mdi-18px"
              aria-hidden="true"
           ></i>
-          <i v-if="isRunning(command)"
+          <i v-if="isRunning(data)"
              class="mdi mdi-loading mdi-18px spin"
              aria-hidden="true"
           ></i>
-          <i v-if="isSuccess(command)"
+          <i v-if="isSuccess(data)"
              class="mdi mdi-check mdi-18px"
              aria-hidden="true"
           ></i>
-          <i v-if="isFailed(command)"
+          <i v-if="isFailed(data)"
              class="mdi mdi-close mdi-18px"
              aria-hidden="true"
           ></i>
           <div>
             <i v-tooltip="{
-                content: command.info,
+                content: data.info,
                 placement: 'bottom',
                 classes: ['tooltip'],
                }"
                class="mdi mdi-information mdi-18px" aria-hidden="true"
             ></i>
-            <button :disabled="isPending(command) || isRunning(command)"
+            <button :disabled="isPending(data) || isRunning(data)"
                @click="runCommand(scale, command)"
                class="icon-button"
             >
@@ -55,6 +55,10 @@ export default {
     },
     command: {
       default: () => null,
+      type: String,
+    },
+    data: {
+      default: () => null,
       type: Object,
     },
     selected: {
@@ -69,34 +73,34 @@ export default {
 
   computed: {
     isSelected() {
-      return `${this.scale}:${this.command.name}` === this.selected;
+      return `${this.scale}:${this.command}` === this.selected;
     },
   },
 
   methods: {
-    isFailed(command) {
-      if (!command || !command.command) {
+    isFailed(data) {
+      if (!data.selected || !data.executed[data.selected]) {
         return false;
       }
-      return command.command.status === 'failed';
+      return data.executed[data.selected].status === 'failed';
     },
-    isPending(command) {
-      if (!command || !command.command) {
+    isPending(data) {
+      if (!data.selected || !data.executed[data.selected]) {
         return false;
       }
-      return command.command.status === 'pending';
+      return data.executed[data.selected].status === 'pending';
     },
-    isRunning(command) {
-      if (!command || !command.command) {
+    isRunning(data) {
+      if (!data.selected || !data.executed[data.selected]) {
         return false;
       }
-      return command.command.status === 'running';
+      return data.executed[data.selected].status === 'running';
     },
-    isSuccess(command) {
-      if (!command || !command.command) {
+    isSuccess(data) {
+      if (!data.selected || !data.executed[data.selected]) {
         return false;
       }
-      return command.command.status === 'success';
+      return data.executed[data.selected].status === 'success';
     },
     updateSelected(value) {
       this.$emit('update:selected', value);
