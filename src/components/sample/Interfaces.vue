@@ -270,8 +270,16 @@ export default {
           selectedCmd.executed = cmd;
           selectedCmd.working = Object.assign({}, cmd);
         } else {
-          const cmd = resp.data;
-          cmd.output = resp.message;
+          let cmd = resp.data;
+          if (typeof cmd === 'undefined') {
+            cmd = { args: {} };
+          }
+          if (typeof resp.message.args === 'undefined') {
+            cmd.output = resp.message;
+          } else {
+            cmd.invalid = Object.keys(resp.message.args);
+            this.showArguments = true;
+          }
           selectedCmd.executed = cmd;
           selectedCmd.working = Object.assign({}, cmd);
         }
