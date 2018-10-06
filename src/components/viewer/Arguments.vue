@@ -22,13 +22,15 @@
         <!-- Number -->
         <b-input v-else-if="v.type === 'integer'"
                  type="number"
-                 v-model.number="$props.data[k]"
+                 @input="setValue('number', k, $event)"
+                 :value="$props.data[k]"
                  :placeholder="inputPlaceholder(k, v)"
         ></b-input>
 
         <!-- String -->
         <b-input v-else
-                 v-model="$props.data[k]"
+                 @input="setValue('string', k, $event)"
+                 :value="$props.data[k]"
                  :placeholder="inputPlaceholder(k, v)"
         ></b-input>
 
@@ -78,6 +80,19 @@ export default {
       const label = this.toCaps(key, { delimiter: '_' });
       const def = this.getDefault(value);
       return `Enter ${label}... (default: ${def})`;
+    },
+
+    setValue(type, key, value) {
+      if (value === null || value === '') {
+        // NOTE: If null just delete the key
+        if (typeof this.data[key] !== 'undefined') {
+          delete this.data[key];
+        }
+      } else if (type === 'number') {
+        this.data[key] = parseInt(value, 10);
+      } else {
+        this.data[key] = value;
+      }
     },
   },
 
