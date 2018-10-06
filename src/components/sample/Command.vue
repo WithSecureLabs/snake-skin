@@ -8,19 +8,19 @@
           - {{ command }}
         </div>
         <div class="level-right">
-          <i v-if="isPending(data)"
+          <i v-if="isPending(commandData)"
              class="mdi mdi-dots-horizontal mdi-18px"
              aria-hidden="true"
           ></i>
-          <i v-if="isRunning(data)"
+          <i v-if="isRunning(commandData)"
              class="mdi mdi-loading mdi-18px spin"
              aria-hidden="true"
           ></i>
-          <i v-if="isSuccess(data)"
+          <i v-if="isSuccess(commandData)"
              class="mdi mdi-check mdi-18px"
              aria-hidden="true"
           ></i>
-          <i v-if="isFailed(data)"
+          <i v-if="isFailed(commandData)"
              class="mdi mdi-close mdi-18px"
              aria-hidden="true"
           ></i>
@@ -70,6 +70,13 @@ export default {
       type: Function,
     },
   },
+  data: () => ({
+    commandData: {},
+  }),
+
+  created() {
+    this.commandData = this.data;
+  },
 
   computed: {
     isSelected() {
@@ -104,6 +111,15 @@ export default {
     },
     updateSelected(value) {
       this.$emit('update:selected', value);
+    },
+  },
+
+  watch: {
+    data: {
+      handler: function handler(value) {
+        this.commandData = Object.assign({}, value);
+      },
+      deep: true,
     },
   },
 };
