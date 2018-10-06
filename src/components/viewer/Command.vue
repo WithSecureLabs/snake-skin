@@ -32,7 +32,7 @@
                }"
                class="mdi mdi-information mdi-18px" aria-hidden="true"
             ></i>
-            <button :disabled="isPending(data) || isRunning(data)"
+            <button :disabled="data.selected === JSON.stringify(data.working.args) && (isPending(data) || isRunning(data))"
                @click="runCommand(scale, command)"
                class="icon-button"
             >
@@ -124,6 +124,10 @@ export default {
   color: inherit;
   cursor:pointer;
   padding: 0;
+  &:disabled {
+    cursor: auto;
+    opacity: 0.5;
+  }
 }
 
 .spin {

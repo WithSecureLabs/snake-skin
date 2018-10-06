@@ -73,19 +73,46 @@
                    @click="showArguments = !showArguments"
                 >({{ showArgumentsText }})</a>
               </p>
-              <b-dropdown :disabled="!activeCommand || !activeCommand.args">
+              <b-dropdown :disabled="!activeCommand || !activeCommand.args || !activeCommand.selected">
                 <button class="button is-outlined" slot="trigger">
                   <span v-if="!activeCommand || !activeCommand.args">No Arguments</span>
-                  <span v-else-if="activeCommand.selected === '{}'">Defaults</span>
-                  <span v-else>{{ activeCommand.selected }}</span>
+                  <span v-else-if="!activeCommand.selected">{{ renderArguments({}) }}</span>
+                  <span v-else>{{ renderArguments(JSON.parse(activeCommand.selected)) }}</span>
                   <b-icon icon="menu-down"></b-icon>
                 </button>
-                <template v-if="activeCommand">
-                  <b-dropdown-item v-for="(v, k) in activeCommand.executed"
-                                   :key="k"
-                                   @click="activeCommand.selected = k; getSelectedCommand()"
-                  >{{ v.args }}</b-dropdown-item>
-                </template>
+                <ul v-if="activeCommand">
+                  <li>
+                    <b-dropdown-item v-for="(v, k) in sortExecuted(activeCommand.executed)"
+                                     :key="k"
+                                     @click="activeCommand.selected = k; getSelectedCommand()"
+                                     style="padding:0 0 0 1rem"
+                    >
+                      <div class="level" style="padding:0">
+                        <div class="level-left">
+                          <span>{{ renderArguments(v.args) }}</span>
+                        </div>
+                        <div class="level-right" style="padding:0">
+                          <i v-if="isPending(v)"
+                             class="mdi mdi-dots-horizontal mdi-18px"
+                             aria-hidden="true"
+                          ></i>
+                          <i v-if="isRunning(v)"
+                             class="mdi mdi-loading mdi-18px spin"
+                             aria-hidden="true"
+                          ></i>
+                          <i v-if="isSuccess(v)"
+                             class="mdi mdi-check mdi-18px"
+                             aria-hidden="true"
+                          ></i>
+                          <i v-if="isFailed(v)"
+                             class="mdi mdi-close mdi-18px"
+                             aria-hidden="true"
+                          ></i>
+                        </div>
+                      </div>
+                    </b-dropdown-item>
+                  </li>
+                </ul>
               </b-dropdown>
             </div>
           </div>
@@ -94,13 +121,13 @@
               <p class="heading">Format</p>
               <b-dropdown>
                 <button class="button is-outlined" slot="trigger">
-                  <span>{{ format }}</span>
+                  <span>{{ toCaps(format) }}</span>
                   <b-icon icon="menu-down"></b-icon>
                 </button>
                 <b-dropdown-item v-for="format in formats"
                                  :key=format
                                  @click="changeFormat(format)"
-                >{{ format }}</b-dropdown-item>
+                >{{ toCaps(format) }}</b-dropdown-item>
               </b-dropdown>
             </div>
           </div>
@@ -121,15 +148,15 @@
       <!-- Arguments -->
       <div v-if="showArguments" class="arguments-list">
         <!-- Timeout field -->
-        <b-field v-if="selectedCommand" label="Timeout">
+        <b-field label="Timeout">
           <b-input type="number"
-                   v-model="selectedCommand.timeout"
+                   v-model="activeCommand.working.timeout"
                    placeholder="Enter Timeout... (default: 600)"
           ></b-input>
         </b-field>
-        <app-arguments v-if="selectedCommand"
+        <app-arguments v-if="activeCommand"
                        :arguments="activeCommand.args"
-                       :data="selectedCommand.args"
+                       :data="activeCommand.working.args"
         ></app-arguments>
       </div>
 
@@ -139,6 +166,7 @@
                       :loading="isLoading(selectedCommand)"
                       :output="selectedCommand.output"
       ></output-content>
+      <pre v-else-if="activeCommand">Command Never Executed...</pre>
       <pre v-else>No Command Selected...</pre>
     </div>
   </div>
@@ -233,6 +261,7 @@ export default {
   },
 
   methods: {
+    sorted,
     toCaps,
 
     changeFormat(format) {
@@ -262,25 +291,31 @@ export default {
       // Update the object
       if (resp.status === 'success') {
         const cmd = resp.data.command;
-        // Blank out defaults
-        if (cmd.timeout === 600) {
-          cmd.timeout = '';
-        }
-        if (cmd.status === 'failed') {
+        if (cmd.status === 'failed' && !cmd.output) {
           cmd.output = 'Command failed'; // XXX: The core should do this
         }
         // Update
         selectedCmd.executed[key] = cmd;
+        // Blank out defaults
+        selectedCmd.working = Object.assign({}, cmd);
+        if (selectedCmd.working.timeout === 600) {
+          delete selectedCmd.working.timeout;
+        }
       } else if (resp.status === 'error') {
         // Create a dummy object
         const cmd = resp.data;
         cmd.output = resp.message;
-        cmd.timeout = '';
         // Update
         selectedCmd.executed[key] = cmd;
+        selectedCmd.working = cmd;
       } else {
         selectedCmd.executed[key] = null;
+        selectedCmd.working = {
+          args: {},
+        };
       }
+      // Force an update
+      this.scales = Object.assign({}, this.scales);
     },
 
     filtered(dict) {
@@ -369,12 +404,13 @@ export default {
     runCommand(scale, command) {
       // Get the selected command
       const cmd = this.scales[scale].commands[command];
-      const key = cmd.selected;
-      const selectedCmd = cmd.executed[key];
-      const { args } = selectedCmd;
-      let { timeout } = selectedCmd;
-      if (this.timeout === '') {
-        timeout = 600;
+      let args = {};
+      let timeout = 600;
+      if (typeof cmd.working.args !== 'undefined') {
+        ({ args } = cmd.working);
+      }
+      if (typeof cmd.working.timeout !== 'undefined') {
+        ({ timeout } = cmd.working);
       }
 
       // Queue it and leave the work to poll
@@ -385,7 +421,11 @@ export default {
         { args, timeout },
       ).then((resp) => {
         if (resp.status === 'success') {
+          const key = JSON.stringify(args);
           cmd.executed[key] = resp.data.command;
+          if (this.activeCommand === cmd) {
+            cmd.selected = key;
+          }
           this.pollCommands();
         } else {
           console.error(resp);
@@ -393,8 +433,45 @@ export default {
       });
     },
 
-    selectArguments(args) {
-      console.info(args);
+    renderArguments(args) {
+      const params = [];
+      Object.entries(args).forEach(([k, v]) => {
+        params.push(`${toCaps(k, { delimiter: '_' })}: ${v}`);
+      });
+      if (params.length > 0) {
+        return params.join(', ');
+      }
+      return 'Defaults';
+    },
+
+    sortExecuted(executed) {
+      const ordered = {};
+      Object.entries(executed).sort(([c, a], [d, b]) => {
+        // Empty first
+        const x = Object.values(a.args);
+        const y = Object.values(b.args);
+        if (x.length === 0) {
+          return -1;
+        }
+        if (y.length === 0) {
+          return 1;
+        }
+        let i = 0;
+        const max = x.length > y.length ? x.length : y.length;
+        while (i < max) {
+          if (x[i] < y[i]) {
+            return -1;
+          }
+          if (x[i] > y[i]) {
+            return 1;
+          }
+          i += 1;
+        }
+        return 0;
+      }).forEach(([key, d]) => {
+        ordered[key] = executed[key];
+      });
+      return ordered;
     },
 
     isFailed(command) {
@@ -429,6 +506,9 @@ export default {
             info: cmd.info,
             executed: {},
             selected: null, // Key to entry in executed
+            working: {
+              args: {},
+            }, // The working copy
           };
         });
         scales[scale] = {
@@ -458,7 +538,7 @@ export default {
         });
       }
 
-      this.scales = scales;
+      this.scales = Object.assign({}, scales);
     },
 
     async selected() {
@@ -496,10 +576,13 @@ export default {
 }
 
 .lists {
+  height: 100%;
   overflow: auto;
 }
 
 .main {
+  display: flex;
+  flex-flow: column;
   padding: 0.5rem;
   width: calc(100vw - 500px);
 
@@ -511,6 +594,8 @@ export default {
 
 .sidebar {
   border-right: 1px solid #999;
+  display: flex;
+  flex-flow: column;
   padding: 0.5rem;
   min-width: 250px;
   width: 250px;

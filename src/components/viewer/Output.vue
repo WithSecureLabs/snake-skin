@@ -10,6 +10,7 @@
     <b-loading :is-full-page="false"
                :active="loading"
                :can-cancel="false"
+               style="z-index:0"
     ></b-loading>
   </div>
 </template>
