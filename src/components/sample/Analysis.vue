@@ -311,7 +311,7 @@ export default {
         cmd.output = resp.message;
         // Update
         selectedCmd.executed[key] = cmd;
-        selectedCmd.working = cmd;
+        selectedCmd.working = Object.assign({}, cmd);
         if (selectedCmd.working.timeout === 600) {
           delete selectedCmd.working.timeout;
         }
