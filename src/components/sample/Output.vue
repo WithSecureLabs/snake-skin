@@ -5,6 +5,7 @@
            v-html="markdown"
            class="markdown"
       ></div>
+      <json v-else-if="format === 'json'" :item="output"></json>
       <pre v-else>{{ output }}</pre>
     </div>
     <b-loading :is-full-page="false"
@@ -16,6 +17,7 @@
 </template>
 
 <script>
+import Json from '@/components/Json.vue';
 import highlightjs from 'highlightjs';
 
 const marked = require('marked-pax');
@@ -55,6 +57,9 @@ marked.setOptions({
 
 export default {
   name: 'Output',
+  components: {
+    json: Json,
+  },
   props: {
     format: {
       default: () => null,

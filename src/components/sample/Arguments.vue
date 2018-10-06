@@ -1,10 +1,12 @@
 <template>
   <div v-if="args" id="arguments" class="arguments">
     <template v-for="(v, k) in args">
-      <b-field :label="toCaps(k, {'delimiter': '_'})" :key="k">
-
+      <b-field :label="label(k, v)"
+               :key="k"
+               :type="getType(inv, k)"
+      >
         <!-- Dropdown -->
-        <b-select v-if="v.values.length > 0"
+        <b-select v-if="v.values && v.values.length > 0"
                   v-model="$props.data[k]"
                   :placeholder="getDefault(v)"
         >
@@ -13,8 +15,9 @@
         </b-select>
 
         <!-- Checkbox -->
-        <b-checkbox v-else-if="(v.type === 'boolean') && ($props.data[k] = v.default)"
-                    v-model="$props.data[k]"
+        <b-checkbox v-else-if="v.type === 'boolean'"
+                    :value="getValue('boolean', k, v)"
+                    @input="setValue('boolean', k, $event)"
         >
           {{ toCaps(k) }}
         </b-checkbox>
@@ -22,16 +25,16 @@
         <!-- Number -->
         <b-input v-else-if="v.type === 'integer'"
                  type="number"
-                 @input="setValue('number', k, $event)"
-                 :value="$props.data[k]"
                  :placeholder="inputPlaceholder(k, v)"
+                 :value="$props.data[k]"
+                 @input="setValue('number', k, $event)"
         ></b-input>
 
         <!-- String -->
         <b-input v-else
-                 @input="setValue('string', k, $event)"
-                 :value="$props.data[k]"
                  :placeholder="inputPlaceholder(k, v)"
+                 :value="$props.data[k]"
+                 @input="setValue('string', k, $event)"
         ></b-input>
 
       </b-field>
@@ -53,17 +56,19 @@ export default {
       default: () => {},
       type: Object,
     },
-    timeout: {
-      default: () => null,
-      type: Number,
+    invalid: {
+      default: () => [],
+      type: Array,
     },
   },
   data: () => ({
     args: {},
+    inv: [],
   }),
 
   mounted() {
     this.args = this.arguments;
+    this.inv = this.invalid;
   },
 
   methods: {
@@ -73,7 +78,7 @@ export default {
       if (argument.default == null) {
         return 'None';
       }
-      return argument.default;
+      return `${argument.default}`;
     },
 
     inputPlaceholder(key, value) {
@@ -82,7 +87,35 @@ export default {
       return `Enter ${label}... (default: ${def})`;
     },
 
+    label(k, v) {
+      const label = toCaps(k, { delimiter: '_' });
+      if (v.required) {
+        return `${label}*`;
+      }
+      return label;
+    },
+
+    getType(inv, key) {
+      if (inv.indexOf(key) !== -1) {
+        return 'is-danger';
+      }
+      return '';
+    },
+
+    getValue(type, key, value) {
+      if (type === 'boolean') {
+        if (typeof this.data[key] === 'undefined') {
+          return value.default;
+        }
+      }
+      return this.data[key];
+    },
+
     setValue(type, key, value) {
+      if (this.invalid) {
+        const index = this.invalid.indexOf(key);
+        this.$delete(this.inv, index);
+      }
       if (value === null || value === '') {
         // NOTE: If null just delete the key
         if (typeof this.data[key] !== 'undefined') {
@@ -99,6 +132,11 @@ export default {
   watch: {
     arguments(value) {
       this.args = value;
+    },
+    invalid(value) {
+      if (value) {
+        this.inv = value;
+      }
     },
   },
 };

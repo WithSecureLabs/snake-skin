@@ -157,6 +157,7 @@
         <app-arguments v-if="activeCommand"
                        :arguments="activeCommand.args"
                        :data="activeCommand.working.args"
+                       :invalid="activeCommand.working.invalid"
         ></app-arguments>
       </div>
 
@@ -173,9 +174,9 @@
 </template>
 
 <script>
-import Arguments from '@/components/viewer/Arguments.vue';
-import Command from '@/components/viewer/Command.vue';
-import Output from '@/components/viewer/Output.vue';
+import Arguments from '@/components/sample/Arguments.vue';
+import Command from '@/components/sample/Command.vue';
+import Output from '@/components/sample/Output.vue';
 import { postCommand, getCommand, getCommands } from '@/api/command';
 import { FORMATS } from '@/settings';
 import { sorted, toCaps } from '@/utils/helpers';
@@ -279,6 +280,9 @@ export default {
         return;
       }
       const executed = selectedCmd.executed[key];
+      if (typeof executed === 'undefined') {
+        return;
+      }
 
       // Run query
       const resp = await getCommand(
@@ -308,6 +312,9 @@ export default {
         // Update
         selectedCmd.executed[key] = cmd;
         selectedCmd.working = cmd;
+        if (selectedCmd.working.timeout === 600) {
+          delete selectedCmd.working.timeout;
+        }
       } else {
         selectedCmd.executed[key] = null;
         selectedCmd.working = {
@@ -403,14 +410,14 @@ export default {
 
     runCommand(scale, command) {
       // Get the selected command
-      const cmd = this.scales[scale].commands[command];
+      const selectedCmd = this.scales[scale].commands[command];
       let args = {};
       let timeout = 600;
-      if (typeof cmd.working.args !== 'undefined') {
-        ({ args } = cmd.working);
+      if (typeof selectedCmd.working.args !== 'undefined') {
+        ({ args } = selectedCmd.working);
       }
-      if (typeof cmd.working.timeout !== 'undefined') {
-        ({ timeout } = cmd.working);
+      if (typeof selectedCmd.working.timeout !== 'undefined') {
+        ({ timeout } = selectedCmd.working);
       }
 
       // Queue it and leave the work to poll
@@ -420,15 +427,37 @@ export default {
         command, // TODO:
         { args, timeout },
       ).then((resp) => {
+        const key = JSON.stringify(args);
         if (resp.status === 'success') {
-          const key = JSON.stringify(args);
-          cmd.executed[key] = resp.data.command;
-          if (this.activeCommand === cmd) {
-            cmd.selected = key;
+          selectedCmd.executed[key] = resp.data.command;
+          if (this.activeCommand === selectedCmd) {
+            selectedCmd.selected = key;
           }
           this.pollCommands();
         } else {
-          console.error(resp);
+          // Create a dummy object
+          const cmd = resp.data;
+          cmd.format = 'json';
+          if (typeof resp.message.args === 'undefined') {
+            cmd.output = resp.message;
+          }
+          // Update
+          // selectedCmd.executed[key] = cmd;
+          selectedCmd.working = cmd;
+          if (typeof resp.message.args !== 'undefined') {
+            selectedCmd.working.invalid = Object.keys(resp.message.args);
+            if (this.activeCommand === selectedCmd) {
+              this.showArguments = true;
+            }
+          }
+          if (selectedCmd.working.timeout === 600) {
+            delete selectedCmd.working.timeout;
+          }
+          if (this.activeCommand === selectedCmd) {
+            selectedCmd.selected = key;
+          }
+          // Force update
+          this.scales = Object.assign({}, this.scales);
         }
       });
     },
@@ -446,10 +475,10 @@ export default {
 
     sortExecuted(executed) {
       const ordered = {};
-      Object.entries(executed).sort(([c, a], [d, b]) => {
+      Object.entries(executed).sort((a, b) => {
         // Empty first
-        const x = Object.values(a.args);
-        const y = Object.values(b.args);
+        const x = Object.values(a[1].args);
+        const y = Object.values(b[1].args);
         if (x.length === 0) {
           return -1;
         }
@@ -468,8 +497,8 @@ export default {
           i += 1;
         }
         return 0;
-      }).forEach(([key, d]) => {
-        ordered[key] = executed[key];
+      }).forEach(([k, v]) => {
+        ordered[k] = v;
       });
       return ordered;
     },
