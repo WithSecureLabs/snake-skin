@@ -22,7 +22,7 @@
         <!-- Number -->
         <b-input v-else-if="v.type === 'integer'"
                  type="number"
-                 v-model="$props.data[k]"
+                 v-model.number="$props.data[k]"
                  :placeholder="inputPlaceholder(k, v)"
         ></b-input>
 
