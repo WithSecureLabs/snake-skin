@@ -66,7 +66,6 @@
         <div class="level-left">
           <div class="level-item">
             <div>
-              <!-- TODO -->
               <p class="heading">
                 Arguments
                 <a v-if="activeCommand"
@@ -535,9 +534,9 @@ export default {
             info: cmd.info,
             executed: {},
             selected: null, // Key to entry in executed
-            working: {
+            working: { // The working copy
               args: {},
-            }, // The working copy
+            },
           };
         });
         scales[scale] = {
@@ -571,7 +570,7 @@ export default {
     },
 
     async selected() {
-      if (this.selected === '') {
+      if (this.selected === ':') {
         return;
       }
       const [scale, command] = this.selected.split(':');

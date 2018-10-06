@@ -1,247 +1,152 @@
 <template>
   <div id="interfaces" class="interfaces">
+
+    <!-- Sidebar -->
     <div class="sidebar">
+      <p class="heading">Scales</p>
+
+      <!-- Scales Filter -->
       <input id="input"
             class="input"
             type="text"
-            v-model="searchText"
+            v-model="filter"
             placeholder="Scale..."
-            style="width:190px"
       >
-      <div>
+
+      <div class="lists">
+        <!-- Active List -->
         <ul class="menu-list">
-          <b-collapse :open="true" class="menu-section" v-for="(v, k) in sorted(scales)" :key=k>
-          <a slot="trigger" class="menu-label" slot-scope="props">
-            <div class="level">
-            <div class="level-left">
-            <span class="scale">{{ k }}</span>
-            </div>
-            <div class="level-right">
-            <i class="mdi mdi-18px"
-               :class="props.open ? 'mdi-menu-down' : 'mdi-menu-right'"
-               aria-hidden="true"></i>
-            </div>
-            </div>
-          </a>
-          <div v-if="v.pullers.length > 0">
-            <h2 class="menu-label submenu-label">Pullers</h2>
-            <ul class="menu-list">
-              <li>
-                <a v-for="cmd in v.pullers" :key="k + cmd.command"
-                   :class="{'is-active': isActive(k, 'pull', cmd.command)}"
-                   @click="selectCommand(k, 'pull', cmd.command)">
-                  <div class="level">
-                    <div class="level-left">
-                      - {{ cmd.command }}
-                    </div>
-                    <div class="level-right">
-                      <i v-if="isPending(k, 'pull', cmd.command)"
-                         class="mdi mdi-dots-horizontal mdi-18px"
-                         aria-hidden="true"></i>
-                      <i v-if="isRunning(k, 'pull', cmd.command)"
-                         class="mdi mdi-loading mdi-18px spin"
-                         aria-hidden="true"></i>
-                      <i v-if="isSuccess(k, 'pull', cmd.command)"
-                         class="mdi mdi-check mdi-18px"
-                         aria-hidden="true"></i>
-                      <i v-if="isFailed(k, 'pull', cmd.command)"
-                         class="mdi mdi-close mdi-18px"
-                         aria-hidden="true"></i>
-                      <div>
-                        <i v-tooltip="{
-                            content: cmd.info,
-                            placement: 'bottom',
-                            classes: ['tooltip'],
-                           }"
-                           class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
-                        <button :disabled="isPending(k, 'pull', cmd.command) || isRunning(k, 'pull', cmd.command)"
-                                @click="runCommand(k, 'pull',cmd.command)"
-                                class="icon-button"
-                        >
-                          <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div v-if="v.pushers.length > 0">
-            <h2 class="menu-label submenu-label">Pushers</h2>
-            <ul class="menu-list">
-              <li>
-                <a v-for="cmd in v.pushers" :key="k + cmd.command"
-                   :class="{'is-active': isActive(k, 'push', cmd.command)}"
-                   @click="selectCommand(k, 'push', cmd.command)">
-                  <div class="level">
-                    <div class="level-left">
-                      - {{ cmd.command }}
-                    </div>
-                    <div class="level-right">
-                      <i v-if="isPending(k, 'push', cmd.command)"
-                         class="mdi mdi-dots-horizontal mdi-18px"
-                         aria-hidden="true"></i>
-                      <i v-if="isRunning(k, 'push', cmd.command)"
-                         class="mdi mdi-loading mdi-18px spin"
-                         aria-hidden="true"></i>
-                      <i v-if="isSuccess(k, 'push', cmd.command)"
-                         class="mdi mdi-check mdi-18px"
-                         aria-hidden="true"></i>
-                      <i v-if="isFailed(k, 'push', cmd.command)"
-                         class="mdi mdi-close mdi-18px"
-                         aria-hidden="true"></i>
-                      <div>
-                        <i v-tooltip="{
-                            content: cmd.info,
-                            placement: 'bottom',
-                            classes: ['tooltip'],
-                           }"
-                           class="mdi mdi-information mdi-18px" aria-hidden="true"></i>
-                        <button :disabled="isPending(k, 'push', cmd.command) || isRunning(k, 'push', cmd.command)"
-                                @click="runCommand(k, 'push', cmd.command)"
-                                class="icon-button"
-                        >
-                          <i class="mdi mdi-play-circle mdi-18px" aria-hidden="true"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              </li>
-            </ul>
-          </div>
+
+          <!-- Scale -->
+          <b-collapse :open="true" class="menu-section" v-for="(v, k) in filtered(scales)" :key=k>
+            <a slot="trigger" class="menu-label submenu-label" slot-scope="props">
+              <div class="level">
+                <div class="level-left">
+                  <span class="scale">{{ k }}</span>
+                </div>
+                <div class="level-right">
+                  <i class="mdi mdi-18px"
+                     :class="props.open ? 'mdi-menu-down' : 'mdi-menu-right'"
+                     aria-hidden="true"
+                  ></i>
+                </div>
+              </div>
+            </a>
+
+            <!-- Pullers -->
+            <template v-if="Object.keys(pullers(k)).length > 0">
+              <span class="menu-label submenu-label subsubmenu-label">Pullers</span>
+              <ul class="menu-list">
+                <app-command v-for="(data, command) in pullers(k)" :key="k + ':' + command"
+                             :scale="k"
+                             :command="command"
+                             :data="data"
+                             :selected.sync="selected"
+                             :run-command="runCommand"
+                ></app-command>
+              </ul>
+            </template>
+
+            <!-- Pushers -->
+            <template v-if="Object.keys(pushers(k)).length > 0">
+              <span class="menu-label submenu-label subsubmenu-label">Pullers</span>
+              <ul class="menu-list">
+                <app-command v-for="(data, command) in pushers(k)" :key="k + ':' + command"
+                             :scale="k"
+                             :command="command"
+                             :data="data"
+                             :selected.sync="selected"
+                             :run-command="runCommand"
+                ></app-command>
+              </ul>
+            </template>
           </b-collapse>
-        </ul>
-        <ul v-if="Object.keys(scales).length === 0">
-          No Interfaces...
         </ul>
       </div>
     </div>
-    <div v-if="selectedScale && selectedType && selectedCommand" class="content">
-      <div class="content-header">
-        <div class="level">
-          <div class="level-left">
-            <b-collapse class="level-item" :open.sync="showDetails">
-              <div slot="trigger" slot-scope="props">
-                <i class="mdi mdi-18px"
-                   :class="props.open ? 'mdi-menu-down' : 'mdi-menu-right'"
-                   aria-hidden="true"></i>
-                <span>Toggle Arguments</span>
-              </div>
-            </b-collapse>
-            <div class="level-item">
-              <span>Format: </span>
-              <b-dropdown>
+
+    <!-- Content -->
+    <div class="main">
+      <!-- Header -->
+      <div class="header level">
+        <div class="level-left">
+          <div class="level-item">
+            <div>
+              <p class="heading">
+                Arguments
+              </p>
+              <button class="button"
+                      :disabled="!selectedCommand"
+                      @click="showArguments = !showArguments">
+                Toggle Arguments
+              </button>
+            </div>
+          </div>
+          <div class="level-item">
+            <div>
+              <p class="heading">Format</p>
+              <b-dropdown :disabled="selectedCommand && selectedCommand.type === 'push'">
                 <button class="button is-outlined" slot="trigger">
-                  <span>{{ format }}</span>
-                    <b-icon icon="menu-down"></b-icon>
+                  <span>{{ toCaps(format) }}</span>
+                  <b-icon icon="menu-down"></b-icon>
                 </button>
                 <b-dropdown-item v-for="format in formats"
                                  :key=format
                                  @click="changeFormat(format)"
-                >{{ format }}</b-dropdown-item>
+                >{{ toCaps(format) }}</b-dropdown-item>
               </b-dropdown>
             </div>
           </div>
-          <div class="level-right">
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <div>
+              <p class="heading">Timestamp</p>
+              <p v-if="selectedCommand && selectedCommand.timestamp">
+                {{ selectedCommand.timestamp }}
+              </p>
+              <p v-else>N/A</p>
+            </div>
           </div>
         </div>
-        <div v-if="showDetails">
-          <b-field label="Timeout">
-            <b-input type="number"
-                     v-model="timeout"
-                     placeholder="Enter Timeout... (default: 600)"
-            ></b-input>
-          </b-field>
-          <template v-for="(v, k) in commandArguments(selectedScale, selectedType, selectedCommand)">
-            <b-field :label="toCaps(k, {'delimiter': '_'})" :key="k">
-              <b-select v-if="v.values.length > 0"
-                        v-model="$data.arguments[k]"
-                        :placeholder="getDefaultArgument(v)"
-              >
-                <option v-if="v.default === null" value="null">None</option>
-                <option v-for="value in v.values" :key="value" :value="value">{{ value }}</option>
-              </b-select>
-              <b-checkbox v-else-if="(v.type === 'boolean') && ($data.arguments[k] = v.default)"
-                          v-model="$data.arguments[k]"
-              >
-                {{ toCaps(k) }}
-              </b-checkbox>
-              <b-input v-else-if="v.type === 'integer'"
-                       type="number"
-                       v-model="$data.arguments[k]"
-                       :placeholder="'Enter ' + toCaps(k, {'delimiter': '_'}) + '... (default: ' + getDefaultArgument(v) + ')'"
-              ></b-input>
-              <b-input v-else
-                       v-model="$data.arguments[k]"
-                       :placeholder="'Enter ' + toCaps(k, {'delimiter': '_'}) + '... (default: ' + getDefaultArgument(v) + ')'"
-              ></b-input>
-            </b-field>
-          </template>
-        </div>
       </div>
-      <div class="content-body">
-        <div style="height:100%">
-          <div v-if="format === 'markdown'"
-               v-html="renderMarkdown(selectedScale, selectedType, selectedCommand)"
-               class="markdown"
-               style="height:100%"
-          ></div>
-          <pre v-else style="height:100%">{{ getExecuted.output }}</pre>
-        </div>
-        <b-loading :is-full-page="false"
-                   :active="isLoading(selectedScale, selectedType, selectedCommand)"
-                   :can-cancel="false"
-        ></b-loading>
+
+      <!-- Arguments -->
+      <div v-if="showArguments" class="arguments-list">
+        <app-arguments v-if="activeCommand"
+                       :arguments="activeCommand.args"
+                       :data="activeCommand.working.args"
+                       :invalid="activeCommand.working.invalid"
+        ></app-arguments>
       </div>
+
+      <!-- Content -->
+      <output-content v-if="selectedCommand"
+                      :format="selectedCommand.format"
+                      :loading="selectedCommand.loading"
+                      :output="selectedCommand.output"
+      ></output-content>
+      <pre v-else-if="activeCommand">Command Never Executed...</pre>
+      <pre v-else>No Command Selected...</pre>
     </div>
   </div>
 </template>
 
 <script>
-import highlightjs from 'highlightjs';
+import Arguments from '@/components/sample/Arguments.vue';
+import Command from '@/components/sample/Command.vue';
+import Output from '@/components/sample/Output.vue';
 import { postScaleInterface } from '@/api/scale';
 import { FORMATS } from '@/settings';
 import { sorted, toCaps } from '@/utils/helpers';
 
-const marked = require('marked-pax');
-
-const renderer = new marked.Renderer();
-renderer.code = (code, language) => {
-  const validLang = !!(language && highlightjs.getLanguage(language));
-  const highlighted = validLang ? highlightjs.highlight(language, code).value : code;
-  return `<pre><code class="hljs ${language}">${highlighted}</code></pre>`;
-};
-
-renderer.color = function func(color, text) {
-  if (color === 'green') {
-    // SASS: cc-greenblue
-    // eslint-disable-next-line no-param-reassign
-    color = 'rgb(36, 200, 148)';
-  }
-  if (color === 'yellow') {
-    // SASS: cc-pumpkin
-    // eslint-disable-next-line no-param-reassign
-    color = 'rgb(237, 137, 0)';
-  }
-  if (color === 'red') {
-    // SASS: cc-faded-red
-    // eslint-disable-next-line no-param-reassign
-    color = 'rgb(218, 68, 83)';
-  }
-  return `<span style="color:${color}">${text}</span>`;
-};
-
-marked.setOptions({
-  breaks: true,
-  renderer,
-  sanitize: true,
-  xhtml: true,
-});
-
 export default {
   name: 'Interfaces',
+  components: {
+    'app-arguments': Arguments,
+    'app-command': Command,
+    'output-content': Output,
+  },
   props: {
     interfaces: {
       default: () => {},
@@ -253,45 +158,54 @@ export default {
     },
   },
   data: () => ({
-    arguments: {},
-    executed: {},
-    format: 'json',
-    formats: [],
-    polling: false,
-    showDetails: false,
-    scales: {},
-    searchText: '',
-    selectedScale: null,
-    selectedType: null,
-    selectedCommand: null,
-    timeout: '',
+    filter: '', // Scale sidebar filter
+    format: '', // Current format
+    formats: [], // Supported formats for selected command
+    scales: {}, // Scales and their interfaces, based on the interfaces prop
+    selected: ':', // Currently selected scale:command
+    showArguments: false, // Toggle argument panel
   }),
 
-  computed: {
-    getExecuted() {
-      const scale = this.selectedScale;
-      const command = this.selectedCommand;
-      if (scale && command) {
-        if (typeof this.executed[scale] !== 'undefined' && typeof this.executed[scale][command] !== 'undefined') {
-          return this.executed[scale][command];
-        }
-      }
-      return '';
-    },
+  created() {
+    // Load in the default formats
+    this.formats = FORMATS;
+    [this.format] = this.formats;
   },
 
-  mounted() {
+  computed: {
+    activeCommand() {
+      const [scale, command] = this.selected.split(':');
+      if (scale === '' || command === '') {
+        return null;
+      }
+      return this.scales[scale].commands[command];
+    },
+
+    selectedCommand() {
+      const selectedCommand = this.activeCommand;
+      if (selectedCommand === null) {
+        return null;
+      }
+      return selectedCommand.executed;
+    },
   },
 
   methods: {
     toCaps,
 
-    sorted(dict) {
+    changeFormat(format) {
+      // Change format then ask for the new output
+      this.format = format;
+      this.getSelectedCommand();
+    },
+
+    filtered(dict) {
+      // Sort a dictionary of data by key while filtering the key based on the filter string
       let d = sorted(dict);
-      if (this.searchText !== '') {
+      if (this.filter !== '') {
         const temp = {};
         Object.entries(d).forEach(([k, v]) => {
-          if (k.includes(this.searchText)) {
+          if (k.includes(this.filter)) {
             temp[k] = v;
           }
         });
@@ -300,137 +214,108 @@ export default {
       return d;
     },
 
-    getDefaultArgument(argument) {
-      if (argument.default == null) {
-        return 'None';
+    async getSelectedCommand() {
+      // Get the data required for the query
+      const [scale, command] = this.selected.split(':');
+      const selectedCmd = this.scales[scale].commands[command];
+      const { executed } = selectedCmd;
+      if (selectedCmd.type === 'push') {
+        if (executed === null) {
+          this.showArguments = true;
+        }
+      } else if (executed === null) {
+        this.runCommand(scale, command);
+      } else if (executed.format !== this.format) {
+        this.runCommand(scale, command);
       }
-      return argument.default;
     },
 
-    changeFormat(format) {
-      this.format = format;
-      this.runCommand(this.selectedScale, this.selectedType, this.selectedCommand);
-    },
-
-    isActive(scale, type, command) {
-      return this.selectedScale === scale &&
-              this.selectedType === type &&
-              this.selectedCommand === command;
-    },
-
-    isLoading(scale, type, command) {
-      return this.isPending(scale, type, command) || this.isRunning(scale, type, command);
-    },
-
-    runCommand(scale, type, command) {
-      let { timeout } = this;
-      if (this.timeout === '') {
-        timeout = 600;
-      }
-
-      if (typeof this.executed[scale] === 'undefined') {
-        this.executed[scale] = {};
-      }
-      this.$set(this.executed[scale], command, {
-        sha256_digest: this.sha256_digest,
-        scale,
-        // args,
-        command,
-        output: null,
-        format: this.format,
-        status: 'running',
+    pullers(scale) {
+      const commands = {};
+      Object.entries(this.scales[scale].commands).forEach(([k, v]) => {
+        if (v.type === 'pull') {
+          commands[k] = v;
+        }
       });
+      return commands;
+    },
+
+    pushers(scale) {
+      const commands = {};
+      Object.entries(this.scales[scale].commands).forEach(([k, v]) => {
+        if (v.type === 'push') {
+          commands[k] = v;
+        }
+      });
+      return commands;
+    },
+
+    runCommand(scale, command) {
+      // Get the selected command
+      const selectedCmd = this.scales[scale].commands[command];
+      selectedCmd.loading = true;
+      let args = {};
+      if (typeof selectedCmd.working.args !== 'undefined') {
+        ({ args } = selectedCmd.working);
+      }
       postScaleInterface(
         scale,
-        type,
+        selectedCmd.type,
         command,
         this.sha256_digest,
-        { args: this.arguments, format: this.format, timeout },
+        { args, format: this.format, timeout: 600 },
       ).then((resp) => {
         if (resp.status === 'success') {
-          this.$set(this.executed[scale], command, {
-            sha256_digest: this.sha256_digest,
-            scale,
-            // args,
-            command,
-            output: resp.data.interface,
-            format: this.format,
-            status: 'success',
-          });
-          this.executed = Object.assign({}, this.executed);
+          const cmd = resp.data.interface;
+          selectedCmd.executed = cmd;
+          selectedCmd.working = Object.assign({}, cmd);
         } else {
-          this.format = 'json';
-          this.$set(this.executed[scale], command, {
-            sha256_digest: this.sha256_digest,
-            scale,
-            // args,
-            command,
-            output: resp.message,
-            format: 'json',
-            status: 'failed',
-          });
-          this.executed = Object.assign({}, this.executed);
+          const cmd = resp.data;
+          cmd.output = resp.message;
+          selectedCmd.executed = cmd;
+          selectedCmd.working = Object.assign({}, cmd);
         }
+        // Force an update
+        this.scales = Object.assign({}, this.scales);
+        selectedCmd.loading = false;
       });
     },
+  },
 
-    selectCommand(scale, type, name) {
-      // TODO: Do me properly
-      if (this.selectedScale === scale &&
-          this.selectedType === type &&
-          this.selectedCommand === name) {
+  watch: {
+    interfaces() {
+      // Preprocess into a more useful format for manipulation etc...
+      const scales = {};
+      Object.entries(this.interfaces).forEach(([scale, cmds]) => {
+        // Build new commands array, this will have variables that we can use for status
+        const commands = {};
+        cmds.forEach((cmd) => {
+          commands[cmd.command] = {
+            args: cmd.args,
+            name: cmd.command,
+            formats: cmd.formats,
+            info: cmd.info,
+            loading: false,
+            executed: null, // The executed command
+            type: cmd.type,
+            working: { // The working copy
+              args: {},
+            },
+          };
+        });
+        scales[scale] = {
+          commands,
+        };
+      });
+      this.scales = Object.assign({}, scales);
+    },
+
+    async selected() {
+      if (this.selected === ':') {
         return;
       }
-      // Only activate if not in executed
-      if (typeof this.executed[scale] === 'undefined' || typeof this.executed[scale][name] === 'undefined') {
-        // NOTE: Don't run pushers by default
-        if (type === 'push') {
-          this.showDetails = true;
-          this.selectedScale = scale;
-          this.selectedType = type;
-          this.selectedCommand = name;
-          // XXX: Should get them from exec otherwise need blanking
-          // this.arguments = this.commandArguments(scale, type, name);
-          this.format = this.executed[scale][name].format;
-          this.timeout = this.executed[scale][name].timeout;
-          return;
-        }
-        this.activateCommand(scale, type, name);
-      } else {
-        this.selectedScale = scale;
-        this.selectedType = type;
-        this.selectedCommand = name;
-        // XXX: Should get them from exec otherwise need blanking
-        // this.arguments = this.commandArguments(scale, type, name);
-        this.format = this.executed[scale][name].format;
-        this.timeout = this.executed[scale][name].timeout;
-      }
-    },
-
-    activateCommand(scale, type, name) {
-      this.selectedScale = scale;
-      this.selectedType = type;
-      this.selectedCommand = name;
-
-      this.arguments = {};
-      this.showDetails = false;
-      this.timeout = '';
-
-      // Handle formats
-      let supportedFormats = [];
-      let commands = [];
-      if (type === 'pull') {
-        commands = this.scales[scale].pullers;
-      } else if (type === 'push') {
-        commands = this.scales[scale].pushers;
-      }
-      commands.some((command) => {
-        if (command.command === name) {
-          supportedFormats = command.formats;
-          return true;
-        }
-        return false;
-      });
+      const [scale, command] = this.selected.split(':');
+      const supportedFormats = this.scales[scale].commands[command].formats;
       this.formats = FORMATS.slice();
       FORMATS.forEach((format) => {
         if (supportedFormats.indexOf(format) === -1) {
@@ -438,167 +323,59 @@ export default {
         }
       });
       [this.format] = this.formats;
-      this.changeFormat(this.format);
-    },
-
-    // Helper functions
-    commandArguments(scale, type, name) {
-      let args = {};
-      if (typeof this.scales[scale] !== 'undefined') {
-        let commands = [];
-        if (type === 'pull') {
-          commands = this.scales[scale].pullers;
-        } else if (type === 'push') {
-          commands = this.scales[scale].pushers;
-        }
-        commands.some((command) => {
-          if (command.command === name) {
-            ({ args } = command);
-            return true;
-          }
-          return false;
-        });
-      }
-      return args;
-    },
-
-    commandOutput(scale, _type, name) {
-      if (typeof this.executed[scale] !== 'undefined' && typeof this.executed[scale][name] !== 'undefined') {
-        return this.executed[scale][name].output;
-      }
-      return '';
-    },
-
-    commandStatus(scale, _type, name) {
-      if (typeof this.executed[scale] !== 'undefined' && typeof this.executed[scale][name] !== 'undefined') {
-        return this.executed[scale][name].status;
-      }
-      return '';
-    },
-
-    commandTimestamp(scale, _type, name) {
-      if (typeof this.executed[scale] !== 'undefined' && typeof this.executed[scale][name] !== 'undefined') {
-        return this.executed[scale][name].timestamp;
-      }
-      return '';
-    },
-
-    isFailed(scale, type, command) {
-      return this.commandStatus(scale, type, command) === 'failed';
-    },
-
-    isPending(scale, type, command) {
-      return this.commandStatus(scale, type, command) === 'pending';
-    },
-
-    isRunning(scale, type, command) {
-      return this.commandStatus(scale, type, command) === 'running';
-    },
-
-    isSuccess(scale, type, command) {
-      return this.commandStatus(scale, type, command) === 'success';
-    },
-
-    renderMarkdown(scale, type, name) {
-      const output = this.commandOutput(scale, type, name);
-      if (output === null) {
-        return marked('');
-      }
-      return marked(output);
-    },
-  },
-
-  watch: {
-    interfaces() {
-      // Put in inactive unless in active
-      Object.entries(this.interfaces).forEach(([k, v]) => {
-        this.$set(this.scales, k, v);
-      });
+      this.getSelectedCommand();
     },
   },
 };
 </script>
 
 <style scoped lang="scss">
-#interface {
-  overflow: auto;
-}
-
-h2.menu-label {
-  color: black;
-}
-
-.menu-list {
-  a {
-    border-bottom-right-radius: 0;
-    border-top-right-radius: 0;
-    font-size: 0.8rem;
-  }
-  .menu-label {
-    padding-left: 0;
-  }
-}
-
-.content {
+.interfaces {
   display: flex;
-  flex-direction: column;
-  height: 77vh;
-  margin-left: 200px;
-  overflow: hidden;
-  padding-left: 1rem;
-}
-
-.content-header {
-  border-bottom: 1px solid #999;
-  padding-bottom: 0.5rem;
-}
-
-.content-body {
   height: 100%;
-  min-height: 50px;
+}
+
+.arguments-list {
+  border-bottom: 1px solid #999;
+  padding: 0.5rem 0;
+}
+
+.header {
+  border-bottom: 1px solid #999;
+}
+
+.lists {
+  height: 100%;
   overflow: auto;
-  position: relative;
-  pre {
-    padding: 0;
+}
+
+.main {
+  display: flex;
+  flex-flow: column;
+  padding: 0.5rem;
+  width: calc(100vw - 500px);
+
+  .level {
+    margin: 0;
+    padding-bottom: 0.5rem
   }
-}
-
-.icon-button {
-  background-color: transparent;
-  border: none;
-  color: currentColor;
-  cursor: pointer;
-  margin: auto;
-  padding: 0;
-}
-
-.scale {
-  color: black;
 }
 
 .sidebar {
   border-right: 1px solid #999;
-  height: 78vh;
-  overflow-x: hidden;
-  overflow-y: auto;
-  position: fixed;
-  width: 200px;
+  display: flex;
+  flex-flow: column;
+  padding: 0.5rem;
+  min-width: 250px;
+  width: 250px;
 }
 
-.submenu-label {
-  margin-bottom:0;
-  margin-left:0.5rem;
+.spacer {
+  height: 1rem;
 }
 
-.spin {
-  animation: spin 1s 0s infinite linear;
-}
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.subsubmenu-label {
+  font-size: 0.75rem;
+  padding: 0 0.5rem;
 }
 </style>

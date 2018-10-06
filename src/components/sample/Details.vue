@@ -101,7 +101,7 @@
             </tbody>
           </table>
         </div>
-        <div v-if="sample && 'parents' in sample && Object.keys(sample.parents).length > 0" 
+        <div v-if="sample && 'parents' in sample && Object.keys(sample.parents).length > 0"
              class="box"
         >
           <h2 class="title">Parents</h2>
@@ -124,7 +124,7 @@
             </tbody>
           </table>
         </div>
-        <div v-if="sample && 'children' in sample && Object.keys(sample.children).length > 0" 
+        <div v-if="sample && 'children' in sample && Object.keys(sample.children).length > 0"
              class="box"
         >
           <h2 class="title">Children</h2>
@@ -276,17 +276,15 @@ export default {
     pullScaleInterfaceInfos() {
       if (this.interfaces && this.sample) {
         Object.entries(this.interfaces).forEach(([k, v]) => {
-          if (typeof v.pullers !== 'undefined') {
-            const found = v.pullers.some(p => p.command === 'info');
-            if (found) {
-              postScaleInterface(k, 'pull', 'info', this.sample.sha256_digest, { format: 'markdown' }).then((resp) => {
-                if (resp.status !== 'error') {
-                  this.$set(this.interface_infos, k, resp.data.interface);
-                } else {
-                  this.$set(this.interface_infos, k, resp.message);
-                }
-              });
-            }
+          const found = v.some(p => p.command === 'info' && p.type === 'pull');
+          if (found) {
+            postScaleInterface(k, 'pull', 'info', this.sample.sha256_digest, { format: 'markdown' }).then((resp) => {
+              if (resp.status !== 'error') {
+                this.$set(this.interface_infos, k, resp.data.interface.output);
+              } else {
+                this.$set(this.interface_infos, k, resp.message);
+              }
+            });
           }
         });
       }

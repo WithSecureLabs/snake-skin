@@ -126,7 +126,7 @@ export default {
       results = await Promise.all(interfaceScales.map(scale => getScaleInterface(scale)));
       results.forEach((result, i) => {
         if (result.status === 'success') {
-          interfaces[interfaceScales[i]] = result.data.interfaces;
+          interfaces[interfaceScales[i]] = result.data.interface;
         }
       });
       this.commands = commands;
@@ -166,6 +166,7 @@ export default {
 
 .tab-content {
   height: calc(100vh - 160px);
+  overflow: auto !important;
 }
 
 .tab-item {
