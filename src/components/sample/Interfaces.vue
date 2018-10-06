@@ -123,7 +123,7 @@
       <!-- Content -->
       <output-content v-if="selectedCommand"
                       :format="selectedCommand.format"
-                      :loading="selectedCommand.loading"
+                      :loading="activeCommand.loading"
                       :output="selectedCommand.output"
       ></output-content>
       <pre v-else-if="activeCommand">Command Never Executed...</pre>
@@ -283,8 +283,6 @@ export default {
           selectedCmd.executed = cmd;
           selectedCmd.working = Object.assign({}, cmd);
         }
-        // Force an update
-        this.scales = Object.assign({}, this.scales);
         selectedCmd.loading = false;
       });
     },
