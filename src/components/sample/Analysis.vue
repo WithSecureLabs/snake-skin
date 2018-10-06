@@ -324,7 +324,7 @@ export default {
       if (this.filter !== '') {
         const temp = {};
         Object.entries(d).forEach(([k, v]) => {
-          if (k.includes(this.searchText)) {
+          if (k.includes(this.filter)) {
             temp[k] = v;
           }
         });
