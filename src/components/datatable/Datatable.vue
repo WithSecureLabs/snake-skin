@@ -193,7 +193,17 @@ export default {
           this.bData = data;
         }
       } else {
-        this.bData = this.data;
+        const d = this.data.slice();
+        d.sort((a, b) => {
+          if (a[this.sortField] > b[this.sortField]) {
+            return this.sortOrder === 'asc' ? 1 : -1;
+          } else if (a[this.sortField] < b[this.sortField]) {
+            return this.sortOrder === 'asc' ? -1 : 1;
+          }
+          return 0;
+        });
+        this.bData = d;
+        this.bTotal = this.data.length;
       }
     },
 
