@@ -235,7 +235,7 @@
                             v-model="pusherName"
                             :disabled="!pusherScale">
                     <template v-if="typeof interfaces[pusherScale] !== 'undefined'">
-                      <option v-for="pusher in interfaces[pusherScale].pushers"
+                      <option v-for="pusher in interfaces[pusherScale].filter(c => c.type === 'push')"
                               :value="pusher.command"
                               :key="pusher.command">
                               {{ pusher.command }}
@@ -506,8 +506,9 @@ export default {
             } else if (component === 'interface') {
               getScaleInterface(scale.name).then((result) => {
                 if (result.status === 'success') {
-                // Only if they have pushers
-                  if (result.data.interface.pushers.length > 0) {
+                  // Only if they have pushers
+                  const pushers = result.data.interface.filter(command => command.type === 'push');
+                  if (pushers.length > 0) {
                     this.$set(this.interfaces, scale.name, result.data.interface);
                   }
                 }
