@@ -3,7 +3,7 @@ export const FORMATS = [
   'plaintext',
   'json',
 ];
-export const SNAKE_API = 'http://localhost:5000';
+export const SNAKE_API = window.location.origin + '/api';
 export const TAGS = {
   delimiters: [
     ':',
