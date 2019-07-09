@@ -53,9 +53,10 @@ export default {
           return false;
         });
       }
-      if (typeof tagName === 'undefined') {
-        tagName = tag;
-      }
+      // NOTE: Do not split the style and name
+      // if (typeof tagName === 'undefined') {
+      tagName = tag;
+      // }
       if (typeof tagStyle === 'undefined') {
         tagStyle = 'is-primary';
       }
