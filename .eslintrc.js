@@ -1,14 +1,24 @@
 module.exports = {
-  root: true,
-  env: {
-    node: true
-  },
-  extends: ["plugin:vue/essential", "@vue/prettier"],
-  rules: {
-    "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
-    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off"
-  },
   parserOptions: {
-    parser: "babel-eslint"
+    ecmaVersion: 2019,
+    sourceType: 'module'
+  },
+  env: {
+    es6: true,
+    browser: true
+  },
+  plugins: [
+    'svelte3'
+  ],
+  overrides: [
+    {
+      files: ['**/*.svelte'],
+      processor: 'svelte3/svelte3'
+    }
+  ],
+  rules: {
+  },
+  settings: {
+    'svelte3/ignore-styles': (style) => style.contains("lang")  // NOTE: Ignore lang overrides as they cannot be parsed
   }
 };

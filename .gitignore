@@ -1,9 +1,16 @@
 .DS_Store
-node_modules
+/node_modules/
+/src/node_modules/@sapper/
+yarn-error.log
+/cypress/screenshots/
+/__sapper__/
 /dist
 
 /tests/e2e/reports/
 selenium-debug.log
+
+# Dynamic static
+static/fonts
 
 # local env files
 .env.local
