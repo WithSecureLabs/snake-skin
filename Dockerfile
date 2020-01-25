@@ -6,7 +6,7 @@ COPY ./package-lock.json /snake-skin
 RUN npm install
 COPY ./ /snake-skin
 RUN NODE_ENV=production npm run build
-RUN npm prune --production
+#RUN npm prune --production
 
 # Create Snake Skin image
 FROM node:13-alpine
