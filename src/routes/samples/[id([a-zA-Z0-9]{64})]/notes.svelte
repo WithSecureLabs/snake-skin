@@ -75,6 +75,7 @@
   }
   .panel-block {
     flex-grow: 1;
+    overflow: auto;
     padding: 0;
   }
 </style>

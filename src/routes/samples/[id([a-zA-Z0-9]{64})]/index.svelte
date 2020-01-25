@@ -96,7 +96,12 @@
     padding: 0;
   }
   .panel {
+    display: flex;
+    flex-flow: column;
     height: 28rem;
+  }
+  .panel-body {
+    overflow: auto;
   }
   .panel-details {
     max-width: 50%;
@@ -112,52 +117,54 @@
   <div class="panel-details column is-narrow">
     <nav class="panel">
       <p class="panel-heading">Summary</p>
-      <div class="panel-block">
-        <div>
-          <p class="heading is-marginless">SHA256 Digest</p>
-          <p class="is-family-monospace">{sample.sha256_digest}</p>
-        </div>
-      </div>
-      <div class="panel-block">
-        <div>
-          <p class="heading is-marginless">Timestamp</p>
-          <p>{sample.timestamp}</p>
-        </div>
-      </div>
-      <div class="panel-block">
-        <div>
-          <p class="heading is-marginless">Size</p>
-          <p>{formatBytes(sample.size)}</p>
-        </div>
-      </div>
-      <div class="panel-block">
-        <div>
-          <p class="heading is-marginless">Submission</p>
-          <p>{sample.submission_type}</p>
-        </div>
-      </div>
-      <div class="panel-block">
-        <div>
-          <p class="heading is-marginless">Magic</p>
-          <p>{sample.magic}</p>
-        </div>
-      </div>
-      <div class="panel-block">
-        <div>
-          <div class="is-flex">
-            <p class="heading is-marginless">Tags</p>
-            <button
-              class="heading button is-minimal is-marginless"
-              disabled={edit_tags}>
-              <a
-                class="heading nomargin mdi mdi-pencil is-small"
-                on:click={() => {
-                  edit_tags = true;
-                  tags = sample.tags;
-                }} />
-            </button>
+      <div class="panel-body">
+        <div class="panel-block">
+          <div>
+            <p class="heading is-marginless">SHA256 Digest</p>
+            <p class="is-family-monospace">{sample.sha256_digest}</p>
           </div>
-          <Tags formatted tags={formatTags(sample.tags)} />
+        </div>
+        <div class="panel-block">
+          <div>
+            <p class="heading is-marginless">Timestamp</p>
+            <p>{sample.timestamp}</p>
+          </div>
+        </div>
+        <div class="panel-block">
+          <div>
+            <p class="heading is-marginless">Size</p>
+            <p>{formatBytes(sample.size)}</p>
+          </div>
+        </div>
+        <div class="panel-block">
+          <div>
+            <p class="heading is-marginless">Submission</p>
+            <p>{sample.submission_type}</p>
+          </div>
+        </div>
+        <div class="panel-block">
+          <div>
+            <p class="heading is-marginless">Magic</p>
+            <p>{sample.magic}</p>
+          </div>
+        </div>
+        <div class="panel-block">
+          <div>
+            <div class="is-flex">
+              <p class="heading is-marginless">Tags</p>
+              <button
+                class="heading button is-minimal is-marginless"
+                disabled={edit_tags}>
+                <a
+                  class="heading nomargin mdi mdi-pencil is-small"
+                  on:click={() => {
+                    edit_tags = true;
+                    tags = sample.tags;
+                  }} />
+              </button>
+            </div>
+            <Tags formatted tags={formatTags(sample.tags)} />
+          </div>
         </div>
       </div>
     </nav>
