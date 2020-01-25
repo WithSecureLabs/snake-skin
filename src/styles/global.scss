@@ -1,0 +1,64 @@
+@charset "utf-8";
+
+@import "./variables.scss";
+@import "../../node_modules/@mdi/font/scss/materialdesignicons.scss";
+@import "../../node_modules/bulma/bulma.sass";
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+button::-moz-focus-inner {
+  border: none !important;
+}
+
+.column {
+  min-height: 0;
+  min-width: 0;
+}
+
+.columns {
+  min-height: 0;
+  min-width: 0;
+}
+
+.is-flex-column {
+  flex-flow: column;
+}
+
+.is-high {
+  height: 100%;
+}
+
+.is-wide {
+  width: 100%;
+}
+
+.item {
+  margin-bottom: 0.5rem;
+}
+
+.no-content {
+  color: $grey;
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  justify-content: center;
+  margin: auto;
+  .mdi {
+    font-size: 7rem;
+    text-align: center;
+  }
+}
+
+.spin {
+  animation-name: spin;
+  animation-duration: 5000ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}

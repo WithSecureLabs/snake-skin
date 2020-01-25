@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="Layer_1"
+   data-name="Layer 1"
+   viewBox="0 0 414.99999 415.00001"
+   version="1.1"
+   width="415"
+   height="415">
+  <metadata
+     id="metadata17">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>snake-icon</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs4">
+    <style
+       id="style2">.cls-1{fill:#fff;}.cls-2{fill:#00bfb3;}</style>
+  </defs>
+  <title
+     id="title6">snake-icon</title>
+  <g
+     id="g865"
+     transform="matrix(1.38,0,0,1.38,-44.5915,-78.765184)">
+    <path
+       style="fill:#ffffff"
+       id="path8"
+       d="m 94.19,228.75 a 2,2 0 0 0 0,2.75 l 24.49,24.49 a 1.93,1.93 0 0 1 0,2.74 l -24.45,24.46 a 2,2 0 0 0 0,2.74 l 20.83,20.83 a 2,2 0 0 0 2.74,0 l 48,-48 a 2,2 0 0 0 0,-2.75 l -48.07,-48.05 a 1.94,1.94 0 0 0 -2.75,0 z"
+       class="cls-1" />
+    <path
+       style="fill:#ffffff"
+       id="path10"
+       d="m 271.16,185.82 a 2,2 0 0 0 0,-2.75 l -24.49,-24.5 a 1.93,1.93 0 0 1 0,-2.74 l 24.45,-24.45 a 2,2 0 0 0 0,-2.75 L 250.29,107.8 a 2,2 0 0 0 -2.75,0 l -48,48 a 2,2 0 0 0 0,2.75 l 48.07,48 a 1.93,1.93 0 0 0 2.74,0 z"
+       class="cls-1" />
+    <path
+       style="fill:#00bfb3"
+       id="path12"
+       d="m 260.08,255.80001 -28.88,-28.89 v 0 l -68.11,-68.11 a 2.16,2.16 0 0 1 0,-3.05 L 231.2,87.640001 a 2.16,2.16 0 0 0 0,-3 l -25.87,-25.93 a 2.18,2.18 0 0 0 -3.05,0 l -97,97.000009 a 2.16,2.16 0 0 0 0,3 l 28.88,28.89 v 0 l 68.11,68.11 a 2.16,2.16 0 0 1 0,3 l -68.11,68.11 a 2.16,2.16 0 0 0 0,3.05 l 25.84,25.99 a 2.16,2.16 0 0 0 3,0 l 97,-97 a 2.16,2.16 0 0 0 0.08,-3.06 z"
+       class="cls-2" />
+  </g>
+</svg>

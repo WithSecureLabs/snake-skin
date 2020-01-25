@@ -1,31 +1,45 @@
-# snake-skin
+# Snake Skin
 
-## Project setup
-```
-yarn install
-```
+Snake Skin is the Web UI for Snake.
 
-### Compiles and hot-reloads for development
-```
-yarn run serve
-```
+## Install
 
-### Compiles and minifies for production
-```
-yarn run build
-```
+Requirements:
+> nodejs
+> npm
 
-### Lints and fixes files
+### Developement
+
+To run Snake Skin for development, execute the following:
+
 ```
-yarn run lint
+npm install
+npm run dev
 ```
 
-### Run your unit tests
+### Production
+
+To run Snake Skin for production, execute the following:
+
 ```
-yarn run test:unit
+npm install
+NODE_ENV=production npm run build
+npm prune --production
+npm start
 ```
 
-### Run your end-to-end tests
+### Docker
+
+To build Snake Skin for Docker, execute the following:
+
 ```
-yarn run test:e2e
+docker build -t countercept/snake-skin . -f Dockerfile
 ```
+
+## Configuration
+
+Snake Skin current supports the following configuration changes through environment variables:
+
+Variable | Default
+--- | ---
+SNAKE_SKIN_SNAKE_API | `http://localhost:5000`
