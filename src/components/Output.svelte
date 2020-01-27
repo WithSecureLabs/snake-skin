@@ -1,4 +1,5 @@
 <script>
+  import dompurify from 'dompurify';
   import hljs from 'highlight.js';
   import marked from 'marked';
 
@@ -23,7 +24,6 @@
   marked.setOptions({
     breaks: true,
     renderer,
-    sanitize: true,
     xhtml: true,
   });
 
@@ -93,7 +93,7 @@
       <pre>{prettyJson(output)}</pre>
     {:else if format === 'markdown'}
       <div class="markdown">
-        {@html marked(output)}
+        {@html dompurify.sanitize(marked(output))}
       </div>
     {:else}
       <pre>{output}</pre>
