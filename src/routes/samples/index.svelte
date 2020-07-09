@@ -14,6 +14,7 @@
   let per_page = 10;
   let samples = [];
   let search_timer;
+  let total = 0;
 
   if (typeof $page.query.filter !== "undefined") {
     filter = $page.query.filter;
@@ -26,26 +27,31 @@
   });
 
   onMount(() => {
-    getSamples(filter);
+    getSamples(cur_page, per_page);
   });
 
-  function getSamples(filter) {
+  function getSamples(cur_page, per_page) {
     loading = true;
-    let crudeFilter =
-      `filter[authentihash]={"$regex":"${filter}","$options":"-i"}&` +
-      `filter[name]={"$regex":"${filter}"}&` +
-      `filter[tags]={"$regex":"${filter}","$options":"-i"}&` +
-      `filter[imphash]=${filter}&` +
-      `filter[md5_digest]=${filter}&` +
-      `filter[mime]=${filter}&` +
-      `filter[pehash]=${filter}&` +
-      `filter[sha1_digest]=${filter}&` +
-      `filter[sha256_digest]=${filter}&` +
-      `filter[sha512_digest]=${filter}&` +
-      "operator=or";
-    snake.getSamples({ filter: crudeFilter, sort: "timestamp" }).then(resp => {
+    let data = { from: (cur_page-1) * per_page, limit: per_page, sort: "timestamp" };
+    if (filter.length > 0) {
+      let crudeFilter =
+        `filter[authentihash]={"$regex":"${filter}","$options":"-i"}&` +
+        `filter[name]={"$regex":"${filter}"}&` +
+        `filter[tags]={"$regex":"${filter}","$options":"-i"}&` +
+        `filter[imphash]=${filter}&` +
+        `filter[md5_digest]=${filter}&` +
+        `filter[mime]=${filter}&` +
+        `filter[pehash]=${filter}&` +
+        `filter[sha1_digest]=${filter}&` +
+        `filter[sha256_digest]=${filter}&` +
+        `filter[sha512_digest]=${filter}&` +
+          "operator=or";
+      data.filter = crudeFilter;
+    }
+    snake.getSamples(data).then(resp => {
       if (resp.status === "success") {
         samples = resp.data.samples;
+        total = resp.data.total;
         loading = false;
       } else {
         console.error(resp);
@@ -53,18 +59,15 @@
     });
   }
 
-  function paginate(samples, cur_page, per_page) {
-    // XXX: The backend does not support pagination... eurgh what a dumb API designer ;)
-    return samples.slice((cur_page - 1) * per_page, cur_page * per_page);
-  }
-
   function searchTimer(filter) {
     // TODO: Update query filter param
     if (search_timer) {
       clearTimeout(search_timer);
     }
-    search_timer = setTimeout(getSamples(filter), 1000);
+    search_timer = setTimeout(getSamples(cur_page, per_page), 1000);
   }
+
+  $: getSamples(cur_page, per_page);
 </script>
 
 <style lang="scss">
@@ -150,7 +153,7 @@
     </thead>
     <tbody>
       {#if samples.length > 0}
-        {#each paginate(samples, cur_page, per_page) as sample}
+        {#each samples as sample}
           <tr>
             <td>
               <a
@@ -195,7 +198,7 @@
       Previous
     </a>
   {/if}
-  {#if cur_page * per_page >= samples.length}
+  {#if cur_page * per_page >= total}
     <a class="pagination-next" disabled>Next</a>
   {:else}
     <a
@@ -242,7 +245,7 @@
         {cur_page}
       </a>
     </li>
-    {#if cur_page + 1 <= Math.ceil(samples.length / per_page)}
+    {#if cur_page + 1 <= Math.ceil(total / per_page)}
       <li>
         <a
           class="pagination-link"
@@ -254,18 +257,18 @@
         </a>
       </li>
     {/if}
-    {#if cur_page + 2 <= Math.ceil(samples.length / per_page)}
+    {#if cur_page + 2 <= Math.ceil(total / per_page)}
       <li>
         <span class="pagination-ellipsis">&hellip;</span>
       </li>
       <li>
         <a
           class="pagination-link"
-          aria-label="Goto page {Math.ceil(samples.length / per_page)}"
+          aria-label="Goto page {Math.ceil(total / per_page)}"
           on:click={() => {
-            cur_page = Math.ceil(samples.length / per_page);
+            cur_page = Math.ceil(total / per_page);
           }}>
-          {Math.ceil(samples.length / per_page)}
+          {Math.ceil(total / per_page)}
         </a>
       </li>
     {/if}
