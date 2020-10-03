@@ -197,6 +197,66 @@
     </nav>
   </div>
 
+  {#if sample && sample.parents && Object.keys(sample.parents).length > 0}
+    <div class="panel-details column is-narrow">
+      <nav class="panel">
+        <p class="panel-heading">Parents</p>
+        <div class="panel-block">
+          <table class="table no-fixed-table">
+            <thead>
+              <tr>
+                <th>Parent (SHA256 Digest)</th>
+                <th>Submission Types</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each Object.entries(sample.parents) as [k, v]}
+                <tr>
+                  <td>
+                    <a href="/samples/{k}" class="is-size-7">{k}</a>
+                  </td>
+                  <td>
+                    <Tags tags={v} />
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      </nav>
+    </div>
+  {/if}
+
+  {#if sample && sample.children && Object.keys(sample.children).length > 0}
+    <div class="panel-details column is-narrow">
+      <nav class="panel">
+        <p class="panel-heading">Children</p>
+        <div class="panel-block">
+          <table class="table no-fixed-table">
+            <thead>
+              <tr>
+                <th>Children (SHA256 Digest)</th>
+                <th>Submission Types</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each Object.entries(sample.children) as [k, v]}
+                <tr>
+                  <td>
+                    <a href="/samples/{k}" class="is-size-7">{k}</a>
+                  </td>
+                  <td>
+                    <Tags tags={v} />
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      </nav>
+    </div>
+  {/if}
+
   {#if hexdump}
     <div class="panel-details column is-narrow">
       <nav class="panel">
