@@ -241,7 +241,7 @@
             for (let j = 0; j < intfs.length; j++) {
               const intf = intfs[j];
               await snake.postScaleInterface(
-                intf.scale,
+                intf.name,
                 "push",
                 intf.command,
                 sample.sha256_digest
