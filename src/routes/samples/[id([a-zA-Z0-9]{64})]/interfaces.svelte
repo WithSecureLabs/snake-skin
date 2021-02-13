@@ -59,6 +59,17 @@
       })
       .then(resp => {
         pullers[puller].resp = resp.data;
+        if (typeof resp.data !== 'undefined') {
+          if (resp.status !== "success") {
+            pullers[puller].resp.interface = {
+              output: resp.message,
+              format: 'plaintext'
+            }
+          }
+        } else {
+          pullers[puller].errors = resp.message.args;
+        }
+        pullers = pullers;
       });
   }
 
@@ -79,8 +90,9 @@
         ...extra
       })
       .then(resp => {
-        draw = true;
-        pushers[pusher].resp = resp.data;
+        drawer = true;
+        pushers[pusher].resp = resp.data.interface;
+        pushers = pushers;
       });
   }
 
