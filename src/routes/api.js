@@ -2,7 +2,7 @@ import { send } from "api/common";
 import { SNAKE_API } from "config";
 
 async function proxy(req, res) {
-  const fetch = require("node-fetch").default;
+  const fetch = (await import('node-fetch')).default;
 
   // 0. Are we auth'd? No because it is not implemented in the backend yet :P
 
