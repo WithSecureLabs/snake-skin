@@ -2,7 +2,7 @@ import { send } from "api/common";
 import { SNAKE_API } from "config";
 
 export async function get(req, res) {
-  const fetch = require("node-fetch").default;
+  const fetch = (await import('node-fetch')).default;
   let headers = {};
   let url = `${SNAKE_API}/download/${req.query.sha256_digest}`;
   fetch(url, {
