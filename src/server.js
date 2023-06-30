@@ -22,10 +22,13 @@ const store = new FileStore({ path: `/tmp/sessions` });
 const whitelist = [
   "/favicon.png",
   "/login",
-  "/logo.png",
+  "/logo.svg",
+  "/manifest.json",
   "/service-worker.js",
   /\/client\/client-[a-z0-9]+\.css/,
   /\/client\/client\.[a-z0-9]+\.js/,
+  /\/client\/inject_styles\.[a-z0-9]+\.js/,
+  /\/client\/login\.[a-z0-9]+\.js/,
 ];
 
 polka() // You can also use Express
