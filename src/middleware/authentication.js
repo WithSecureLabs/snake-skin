@@ -119,13 +119,14 @@ export function authorise({ whitelist }) {
         });
         res.end();
       }
-      console.log(`~> Authorised user ${decoded.preferred_username}`);
+      const user = decoded.preferred_username ?? decoded.upn ?? decoded.email;
+      console.log(`~> Authorised user ${user}`);
       req.session.refresh = {
         expires: tokens.refresh_token_expires_in,
         uuid: uuidv4(),
       };
       req.session.tokens = tokens;
-      req.session.user = decoded.preferred_username;
+      req.session.user = user;
       res.writeHead(302, {
         Location: "/?auth=success",
       });
