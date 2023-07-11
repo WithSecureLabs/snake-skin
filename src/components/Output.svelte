@@ -1,7 +1,7 @@
 <script>
-  import dompurify from 'dompurify';
-  import hljs from 'highlight.js';
-  import marked from 'marked';
+  import dompurify from "dompurify";
+  import hljs from "highlight.js";
+  import { marked } from "marked";
 
   export let format = undefined;
   export let output;
@@ -13,9 +13,13 @@
     return `<pre><code class="hljs ${language}">${highlighted}</code></pre>`;
   };
   renderer.heading = function (text, level) {
-    let c = '';
-    if (level === 1) { c = 'title' };
-    if (level === 2) { c = 'subtitle' };
+    let c = "";
+    if (level === 1) {
+      c = "title";
+    }
+    if (level === 2) {
+      c = "subtitle";
+    }
     return `<h${level} class='${c}'>${text}</h${level}>`;
   };
   renderer.table = (header, body) => {
@@ -29,7 +33,7 @@
 
   // TODO: Use a component so we can do colours and things
   function prettyJson(output) {
-    const json = JSON.stringify(output)
+    const json = JSON.stringify(output);
     let pretty = "";
     let indent_level = 0;
     let open = false;
@@ -60,7 +64,7 @@
           pretty += "  ".repeat(indent_level);
         }
       }
-      if (char === '\\') {
+      if (char === "\\") {
         b_count += 1;
       } else {
         b_count = 0;
@@ -69,6 +73,22 @@
     return pretty;
   }
 </script>
+
+<div class="output">
+  <div class="output-inner">
+    {#if !output}
+      <pre>No output...</pre>
+    {:else if format === "json"}
+      <pre>{prettyJson(output)}</pre>
+    {:else if format === "markdown"}
+      <div class="markdown">
+        {@html dompurify.sanitize(marked(output))}
+      </div>
+    {:else}
+      <pre>{output}</pre>
+    {/if}
+  </div>
+</div>
 
 <style>
   pre {
@@ -84,19 +104,3 @@
     padding: 0.75rem;
   }
 </style>
-
-<div class="output">
-  <div class="output-inner">
-    {#if !output}
-      <pre>No output...</pre>
-    {:else if format === 'json'}
-      <pre>{prettyJson(output)}</pre>
-    {:else if format === 'markdown'}
-      <div class="markdown">
-        {@html dompurify.sanitize(marked(output))}
-      </div>
-    {:else}
-      <pre>{output}</pre>
-    {/if}
-  </div>
-</div>
