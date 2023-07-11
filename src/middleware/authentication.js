@@ -52,7 +52,7 @@ export function authorise({ whitelist }) {
     }
     const { default: fetch } = await import("node-fetch");
     if (cache.expires < new Date()) {
-      console.info("updating cache...");
+      console.debug("updating cache...");
       let response;
       response = await fetch(process.env.SNAKE_OAUTH_OPENID_URL);
       const metadata = await response.json();
@@ -119,6 +119,7 @@ export function authorise({ whitelist }) {
         });
         res.end();
       }
+      console.log(`~> Authorised user ${decoded.preferred_username}`);
       req.session.refresh = {
         expires: tokens.refresh_token_expires_in,
         uuid: uuidv4(),

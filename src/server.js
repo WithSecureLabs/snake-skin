@@ -31,6 +31,12 @@ const whitelist = [
   /\/client\/login\.[a-z0-9]+\.js/,
 ];
 
+function logger(req, res, next) {
+  const source = req.headers["X-Forwarded-For"] || req.socket.remoteAddress;
+  console.log(`~> Received ${req.method} on ${req.url} from ${source}`);
+  next(); // move on
+}
+
 polka() // You can also use Express
   .use(
     bodyParser.json(),
@@ -48,6 +54,7 @@ polka() // You can also use Express
     authorise({ whitelist }),
     compression({ threshold: 0 }),
     sirv("static", { dev }),
+    logger,
     sapper.middleware({
       session: (req, res) => {
         res.setHeader("cache-control", "no-cache, no-store");
@@ -57,7 +64,7 @@ polka() // You can also use Express
           user: req.session.user,
         };
       },
-    })
+    }),
   )
   .listen(PORT, (err) => {
     if (err) console.log("error", err);
